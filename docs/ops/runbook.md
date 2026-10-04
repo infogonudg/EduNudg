@@ -72,7 +72,7 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
 1. Link repo to Vercel (Root Directory: `apps/web`)
 2. Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (same cloud project or production project)
 3. **Portal hosts** — pick one:
-   - **Same-origin (default on `*.vercel.app`)**: leave `VITE_PORTAL_BASE_DOMAIN` unset. Brand / Franchise / Student portals open on the same URL with `?portal=&brand=` (and `center=` when needed). Platform **Brand backend** handoff uses this automatically.
+   - **Same-origin (default when `VITE_PORTAL_BASE_DOMAIN` is unset)**: Brand / Franchise / Student portals open on the **current** host with `?portal=&brand=` (and `center=` when needed) — applies to `*.vercel.app` **and** purchased brand domains (e.g. `www.smartbraineducations.com`). Franchise Management **View Frontend** / **View Backend** MUST use those query URLs, never `{center}.{brand}.localhost`. Platform **Brand backend** handoff uses this automatically.
    - **Real multi-host / purchased brand domain**: add the host in Vercel Domains, DNS at the registrar, and `domain_mappings` (hostname → brand, `portal_type = brand`). The SPA loads the brand **slug from `brands` via the mapped `brand_id`** — do not rely on hostname labels (e.g. `smartbraineducations.com` must resolve `smart-brain-abacus`, not a fake slug `smartbraineducations`). Optional: `VITE_PORTAL_BASE_DOMAIN=yourdomain.com` + wildcard `*.yourdomain.com` for center/learn subdomains (seed rows still use `*.localhost` for local).
 4. Supabase Auth → add production Site URL / Redirect URLs for `https://edunudg-hub.vercel.app/**` (and custom domains when used)
 

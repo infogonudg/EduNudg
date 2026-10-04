@@ -273,6 +273,27 @@ describe("CenterDetailPanel franchise login credentials", () => {
     );
   });
 
+  it("regression_brand_centers_view_frontend_avoids_localhost_on_custom_domain", async () => {
+    Object.defineProperty(window, "location", {
+      value: {
+        protocol: "https:",
+        hostname: "www.smartbraineducations.com",
+        port: "",
+        origin: "https://www.smartbraineducations.com",
+      },
+      writable: true,
+    });
+    renderPanel();
+    expect(await screen.findByRole("link", { name: "View Frontend ↗" })).toHaveProperty(
+      "href",
+      "https://www.smartbraineducations.com/?portal=center&brand=vihaan-abacas-pune&center=arti-drawing"
+    );
+    expect(screen.getByRole("link", { name: "View Backend ↗" })).toHaveProperty(
+      "href",
+      "https://www.smartbraineducations.com/app?portal=center&brand=vihaan-abacas-pune&center=arti-drawing"
+    );
+  });
+
   it("regression_brand_centers_confirm_delete_calls_soft_delete_rpc", async () => {
     const onDeleted = vi.fn();
     const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });

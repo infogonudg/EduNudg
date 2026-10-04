@@ -5,7 +5,6 @@
  * Single-host (e.g. *.vercel.app without base domain): same-origin + ?portal=&brand=
  */
 
-import { isPlatformHost } from "@edunudg/tenant";
 import {
   portalOverrideSearchParams,
   type PortalOverride,
@@ -51,13 +50,14 @@ export function getPortalBaseDomain(): string {
 }
 
 /**
- * When true, brand/center/learn portals share the platform origin and use ?portal=&brand= overrides.
- * Used for Vercel *.vercel.app until a custom wildcard domain is configured.
+ * When true, brand/center/learn portals share the current origin and use ?portal=&brand= overrides.
+ * Used on Vercel *.vercel.app and brand custom domains (e.g. smartbraineducations.com) until
+ * VITE_PORTAL_BASE_DOMAIN enables real multi-host subdomains.
  */
 export function usesSameOriginPortals(): boolean {
   if (isLocalDevHost()) return false;
-  if (getPortalBaseDomain()) return false;
-  return isPlatformHost(currentHostname());
+  // No wildcard portal base → keep links on this host (never emit *.localhost on Production).
+  return !getPortalBaseDomain();
 }
 
 /** Rewrite seed/RPC `*.localhost` hosts to the current environment's portal base domain. */
