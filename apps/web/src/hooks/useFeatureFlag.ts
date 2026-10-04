@@ -78,7 +78,7 @@ export function useFeatureFlag(key: string): boolean {
   if (key === "platform_brand_signup") {
     return platformIntegrations.platform_brand_signup;
   }
-
+//Platform feature flags
   if (tenant.portalType === "platform") {
     return FEATURE_FLAG_DEFAULTS[key] ?? true;
   }

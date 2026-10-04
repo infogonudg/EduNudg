@@ -124,7 +124,7 @@ On `/admin/brands`, each active brand row SHALL expose a **View Frontend ↗** l
 
 ### Requirement: Brand detail domains and centers paginate
 
-On `/admin/brands/:slug`, **Domains** and **Franchise centers** SHALL paginate with the same directory chrome as `/admin/brands` (`DirectoryPagination`, 10 rows per page) once a list has more than 10 items.
+On `/admin/brands/:slug`, **Domains** and **Franchise centers** SHALL paginate with the same directory chrome as `/admin/brands` (`DirectoryPagination`, 10 rows per page) once a list has more than 10 items. **Domains** SHALL also let platform admins add and remove **brand** portal custom hostnames via `upsert_brand_domain_mapping` / `delete_brand_domain_mapping` (not SQL). After save, the UI SHALL remind ops to attach the host in Vercel and DNS.
 
 #### Scenario: Paginate franchise centers and domains
 
@@ -132,6 +132,13 @@ On `/admin/brands/:slug`, **Domains** and **Franchise centers** SHALL paginate w
 - **WHEN** a platform admin opens `/admin/brands/:slug`
 - **THEN** each section shows the first 10 rows plus Previous / Next controls
 - **AND** Next reveals the remaining rows
+
+#### Scenario: Add purchased brand hostname from Domains
+
+- **GIVEN** a platform admin is on `/admin/brands/:slug` Domains
+- **WHEN** they enter a hostname and click **Add domain**
+- **THEN** a brand portal `domain_mappings` row is upserted for that brand
+- **AND** the UI shows that Vercel Domains + registrar DNS are still required
 
 ### Requirement: Ephemeral E2E brand hard purge
 

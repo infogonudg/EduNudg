@@ -14,6 +14,7 @@ import { resolvedBrandSiteLogoUrl } from "@/lib/brandLandingEditorApi";
 import { supabaseList, supabaseMaybe } from "@/lib/supabaseResult";
 import { useBrandMonitoringStats } from "@/hooks/useBrandMonitoringStats";
 import { BrandEditForm } from "./BrandEditForm";
+import { BrandDomainsCard } from "./BrandDomainsCard";
 import { BrandFeatureTogglesCard } from "./BrandFeatureTogglesCard";
 import { BrandPerformanceCard } from "./BrandPerformanceCard";
 import { PortalOpenButton } from "./PortalOpenButton";
@@ -131,10 +132,6 @@ export function BrandDetailPage() {
     () => paginateBrandDetailList(centers.data ?? [], centersPage),
     [centers.data, centersPage]
   );
-  const domainsList = useMemo(
-    () => paginateBrandDetailList(domains.data ?? [], domainsPage),
-    [domains.data, domainsPage]
-  );
 
   useEffect(() => {
     setCentersPage(1);
@@ -251,33 +248,13 @@ export function BrandDetailPage() {
         />
       )}
 
-      <Card title="Domains">
-        <DataList
-          items={domainsList.items.map((d, i) => ({ ...d, id: `${d.hostname}-${i}` }))}
-          empty="No domain mappings for this brand."
-          render={(d) => {
-            const target = portalTargetFromDomain(d.portal_type, d.hostname, b.slug);
-            return (
-              <ListRow aside={target ? <PortalOpenButton target={target} /> : undefined}>
-                <span>
-                  {d.hostname} — {d.portal_type}
-                  {d.is_primary ? " (primary)" : ""}
-                </span>
-              </ListRow>
-            );
-          }}
-        />
-        {shouldPaginateBrandDetailList(domainsList.total) ? (
-          <DirectoryPagination
-            aria-label="Domains pagination"
-            summary={brandDetailPaginationSummary(domainsList, "No domains")}
-            onPrevious={() => setDomainsPage((current) => Math.max(1, current - 1))}
-            onNext={() => setDomainsPage((current) => Math.min(domainsList.pageCount, current + 1))}
-            disablePrevious={domainsList.page <= 1}
-            disableNext={domainsList.page >= domainsList.pageCount}
-          />
-        ) : null}
-      </Card>
+      <BrandDomainsCard
+        brandId={b.id}
+        brandSlug={b.slug}
+        domains={domains.data ?? []}
+        domainsPage={domainsPage}
+        onDomainsPageChange={setDomainsPage}
+      />
 
       <Card
         title="Franchise centers"

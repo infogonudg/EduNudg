@@ -29,7 +29,7 @@ All mutable business tables: `created_at`, `updated_at`, `created_by`, `updated_
 | `auth_audit_logs` | auth | Append-only sign-in events (`login_success`, `login_failure`, `logout`, `access_denied`) with `portal`, optional `brand_id`/`center_id`, session dedup. Platform `/admin/audit` Auth stream. Full IP is platform-only. Tenant staff read via `list_tenant_staff_audit` (failed-login emails and raw IP redacted). |
 | `access_audit_logs` | audit | Sensitive actions: CSV export, Copy Profile URL, owner credentials, platform portal handoff. Platform SELECT; tenant via `list_tenant_staff_audit`. |
 | `client_error_reports` | audit | Fatal SPA errors (ErrorBoundary, `window.onerror`, `unhandledrejection`). Platform `/admin/audit` Errors stream only. |
-| `domain_mappings` | routing | Hostname → portal |
+| `domain_mappings` | routing | Hostname → portal. Purchased brand hosts: platform admin upsert/delete via `upsert_brand_domain_mapping` / `delete_brand_domain_mapping` (`109`) from `/admin/brands/:slug` Domains — still requires Vercel + DNS outside the app. |
 | `platform_brand_signups` | platform | Self-serve EduNudg brand signup queue |
 
 ### `franchise_centers` public profile (migration `046`)
