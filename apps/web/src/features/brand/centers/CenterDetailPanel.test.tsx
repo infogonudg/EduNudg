@@ -170,11 +170,11 @@ describe("CenterDetailPanel franchise login credentials", () => {
     renderPanel();
     await screen.findByLabelText("Login email");
     const loginLink = screen.getByRole("link", {
-      name: /edunudg-hub\.vercel\.app\/login\?portal=center&brand=vihaan-abacas-pune&center=arti-drawing/,
+      name: /edunudg-hub\.vercel\.app\/b\/vihaan-abacas-pune\/centers\/arti-drawing\/login/,
     });
     expect(loginLink).toHaveProperty(
       "href",
-      "https://edunudg-hub.vercel.app/login?portal=center&brand=vihaan-abacas-pune&center=arti-drawing"
+      "https://edunudg-hub.vercel.app/b/vihaan-abacas-pune/centers/arti-drawing/login"
     );
   });
 

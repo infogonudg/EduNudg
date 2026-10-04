@@ -5,7 +5,9 @@
  * Single-host (e.g. *.vercel.app without base domain): same-origin + ?portal=&brand=
  */
 
+import { isPlatformHost } from "@edunudg/tenant";
 import {
+  isPortalPathSlug,
   portalOverrideSearchParams,
   type PortalOverride,
 } from "@/lib/portalOverride";
@@ -202,9 +204,38 @@ export function portalBackendUrl(target: PortalTarget): string {
   return `${origin}${path}`;
 }
 
-/** Staff login URL for a portal (brand/center → /login; same-origin adds ?portal=&brand=). */
+/**
+ * Client-friendly login path on same-origin hosts.
+ * Custom brand domain: /centers/{center}/login
+ * Vercel / platform host: /b/{brand}/centers/{center}/login
+ */
+export function prettyPortalLoginPath(target: PortalTarget): string | null {
+  const brand = target.brandSlug.trim().toLowerCase();
+  const center = target.centerSlug?.trim().toLowerCase() ?? "";
+  if (!isPortalPathSlug(brand)) return null;
+
+  const includeBrand = isPlatformHost(currentHostname());
+  if (target.portalType === "center" && center && isPortalPathSlug(center)) {
+    return includeBrand
+      ? `/b/${brand}/centers/${center}/login`
+      : `/centers/${center}/login`;
+  }
+  if (target.portalType === "learn" && center && isPortalPathSlug(center)) {
+    return includeBrand
+      ? `/b/${brand}/centers/${center}/student-login`
+      : `/centers/${center}/student-login`;
+  }
+  if (target.portalType === "brand" && includeBrand) {
+    return `/b/${brand}/login`;
+  }
+  return null;
+}
+
+/** Staff login URL for a portal (pretty path on same-origin; localhost keeps host-based /login). */
 export function portalLoginUrl(target: PortalTarget): string {
   if (usesSameOriginPortals()) {
+    const pretty = prettyPortalLoginPath(target);
+    if (pretty) return `${window.location.origin}${pretty}`;
     return sameOriginUrl("/login", target);
   }
   const origin = portalOriginUrl(target).replace(/\/$/, "");

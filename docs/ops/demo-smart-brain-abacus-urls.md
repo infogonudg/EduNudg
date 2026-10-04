@@ -95,8 +95,10 @@ Seed data includes the brand only — no default center. Create centers in the b
 | Purpose | URL |
 |---------|-----|
 | Center public site | https://edunudg-hub.vercel.app/?portal=center&brand=smart-brain-abacus&center={center-slug} |
-| Center login | https://edunudg-hub.vercel.app/login?portal=center&brand=smart-brain-abacus&center={center-slug} |
+| Center login (pretty) | https://edunudg-hub.vercel.app/b/smart-brain-abacus/centers/{center-slug}/login |
+| Center login (legacy query, still works) | https://edunudg-hub.vercel.app/login?portal=center&brand=smart-brain-abacus&center={center-slug} |
 | Center staff app (backend) | https://edunudg-hub.vercel.app/app?portal=center&brand=smart-brain-abacus&center={center-slug} |
+| On brand custom domain (e.g. www / dev) | `https://www.smartbraineducations.com/centers/{center-slug}/login` |
 | Center leads | https://edunudg-hub.vercel.app/app/leads?portal=center&brand=smart-brain-abacus&center={center-slug} |
 | Center students | https://edunudg-hub.vercel.app/app/students?portal=center&brand=smart-brain-abacus&center={center-slug} |
 | Center settings | https://edunudg-hub.vercel.app/app/settings?portal=center&brand=smart-brain-abacus&center={center-slug} |
@@ -110,7 +112,8 @@ Seed data includes the brand only — no default center. Create centers in the b
 | Purpose | URL |
 |---------|-----|
 | Student portal home | https://edunudg-hub.vercel.app/?portal=learn&brand=smart-brain-abacus |
-| Student login | https://edunudg-hub.vercel.app/login?portal=learn&brand=smart-brain-abacus&center={center-slug} |
+| Student login (pretty) | https://edunudg-hub.vercel.app/b/smart-brain-abacus/centers/{center-slug}/student-login |
+| Student login on custom domain | `https://www.smartbraineducations.com/centers/{center-slug}/student-login` |
 | Parent portal | https://edunudg-hub.vercel.app/?portal=parents&brand=smart-brain-abacus |
 
 ---

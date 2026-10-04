@@ -92,6 +92,8 @@ export function AppRoutes() {
         <Route path="/auth/handoff" element={<AuthHandoffPage />} />
         <Route element={<LearnPublicLoginLayout />}>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/centers/:centerSlug/student-login" element={<LoginPage />} />
+          <Route path="/b/:brandSlug/centers/:centerSlug/student-login" element={<LoginPage />} />
         </Route>
         <Route
           path="/"
@@ -137,10 +139,22 @@ export function AppRoutes() {
         <Route element={<MarketingPublicLayout />}>
           <Route path="/" element={<MarketingHomePage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/b/:brandSlug/login" element={<LoginPage />} />
+          <Route path="/b/:brandSlug/centers/:centerSlug/login" element={<LoginPage />} />
+          <Route path="/b/:brandSlug/centers/:centerSlug/student-login" element={<LoginPage />} />
+          <Route path="/centers/:centerSlug/login" element={<LoginPage />} />
+          <Route path="/centers/:centerSlug/student-login" element={<LoginPage />} />
           <Route path="/legal/:kind" element={<MarketingLegalPage />} />
         </Route>
       ) : tenant.portalType !== "brand" ? (
-        <Route path="/login" element={<LoginPage />} />
+        <>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/centers/:centerSlug/login" element={<LoginPage />} />
+          <Route path="/centers/:centerSlug/student-login" element={<LoginPage />} />
+          <Route path="/b/:brandSlug/centers/:centerSlug/login" element={<LoginPage />} />
+          <Route path="/b/:brandSlug/centers/:centerSlug/student-login" element={<LoginPage />} />
+          <Route path="/b/:brandSlug/login" element={<LoginPage />} />
+        </>
       ) : null}
 
       {tenant.portalType === "platform" && (
@@ -175,7 +189,12 @@ export function AppRoutes() {
             <Route path="/courses/:slug" element={<PublicCoursePage />} />
             <Route path="/legal/:kind" element={<BrandLegalPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/b/:brandSlug/login" element={<LoginPage />} />
           </Route>
+          <Route path="/centers/:centerSlug/login" element={<LoginPage />} />
+          <Route path="/centers/:centerSlug/student-login" element={<LoginPage />} />
+          <Route path="/b/:brandSlug/centers/:centerSlug/login" element={<LoginPage />} />
+          <Route path="/b/:brandSlug/centers/:centerSlug/student-login" element={<LoginPage />} />
           <Route
             path="/app"
             element={
