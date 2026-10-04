@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { TenantContext } from "@edunudg/tenant";
 import {
+  applyHostnameTenantRpc,
   mergePortalBrandingScope,
   needsBrandPortalBranding,
   needsPortalScopeIds,
@@ -159,63 +160,69 @@ describe("resolveTenantScope helpers", () => {
   });
 
   it("regression_custom_apex_domain_scope_uses_mapped_brand_slug", async () => {
-    const rpc = vi.fn().mockResolvedValue({
-      data: {
-        brand_id: SMART_BRAIN_BRAND_ID,
-        brand_slug: "smart-brain-abacus",
-        brand_name: "Smart Brain Abacus",
-        brand_logo_url: null,
-        center_id: null,
-        center_slug: null,
-        center_name: null,
-        login_headline: null,
-        login_subtext: null,
-      },
-      error: null,
+    const rpc = vi.fn(async (name: string) => {
+      if (name === "resolve_hostname_tenant") {
+        return {
+          data: {
+            hostname: "smartbraineducations.com",
+            portal_type: "brand",
+            brand_id: SMART_BRAIN_BRAND_ID,
+            center_id: null,
+            brand_slug: "smart-brain-abacus",
+            center_slug: null,
+          },
+          error: null,
+        };
+      }
+      if (name === "get_portal_branding") {
+        return {
+          data: {
+            brand_id: SMART_BRAIN_BRAND_ID,
+            brand_slug: "smart-brain-abacus",
+            brand_name: "Smart Brain Abacus",
+            brand_logo_url: null,
+            center_id: null,
+            center_slug: null,
+            center_name: null,
+            login_headline: null,
+            login_subtext: null,
+          },
+          error: null,
+        };
+      }
+      throw new Error(`unexpected rpc ${name}`);
     });
 
-    const supabase = {
-      from: (table: string) => {
-        if (table === "domain_mappings") {
-          return {
-            select: () => ({
-              eq: () => ({
-                maybeSingle: async () => ({
-                  data: {
-                    hostname: "smartbraineducations.com",
-                    portal_type: "brand",
-                    brand_id: SMART_BRAIN_BRAND_ID,
-                    center_id: null,
-                  },
-                  error: null,
-                }),
-              }),
-            }),
-          };
-        }
-        if (table === "brands") {
-          return {
-            select: () => ({
-              eq: () => ({
-                maybeSingle: async () => ({ data: { slug: "smart-brain-abacus" }, error: null }),
-              }),
-            }),
-          };
-        }
-        throw new Error(`unexpected table ${table}`);
-      },
-      rpc,
-    };
-
-    const tenant = await resolveTenantScope(supabase as never, "smartbraineducations.com");
+    const tenant = await resolveTenantScope({ rpc, from: vi.fn() } as never, "smartbraineducations.com");
 
     expect(tenant.portalType).toBe("brand");
     expect(tenant.brandSlug).toBe("smart-brain-abacus");
     expect(tenant.brandId).toBe(SMART_BRAIN_BRAND_ID);
     expect(tenant.centerSlug).toBeNull();
+    expect(rpc).toHaveBeenCalledWith("resolve_hostname_tenant", {
+      p_hostname: "smartbraineducations.com",
+    });
     expect(rpc).toHaveBeenCalledWith("get_portal_branding", {
       p_brand_slug: "smart-brain-abacus",
       p_center_slug: null,
     });
+  });
+
+  it("regression_apply_hostname_tenant_rpc_rejects_hostname_label_without_brand_slug", () => {
+    const base: TenantContext = {
+      hostname: "smartbraineducations.com",
+      portalType: "brand",
+      brandId: null,
+      centerId: null,
+      brandSlug: "smartbraineducations",
+      centerSlug: null,
+    };
+    expect(
+      applyHostnameTenantRpc(base, {
+        portal_type: "brand",
+        brand_id: SMART_BRAIN_BRAND_ID,
+        brand_slug: null,
+      })
+    ).toBeNull();
   });
 });

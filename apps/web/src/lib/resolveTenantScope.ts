@@ -2,6 +2,7 @@ import {
   mergeDomainMapping,
   resolveTenantFromHost,
   type DomainMappingRow,
+  type PortalType,
   type TenantContext,
 } from "@edunudg/tenant";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -63,9 +64,40 @@ export function mergePortalBrandingScope(tenant: TenantContext, branding: Portal
   };
 }
 
+type HostnameTenantRpc = {
+  hostname?: string;
+  portal_type?: string;
+  brand_id?: string | null;
+  center_id?: string | null;
+  brand_slug?: string | null;
+  center_slug?: string | null;
+};
+
+const PORTAL_TYPES = new Set<PortalType>(["platform", "brand", "center", "learn", "parents"]);
+
+/** Apply SECURITY DEFINER hostname RPC (works for anon; brands RLS blocks direct slug SELECT). */
+export function applyHostnameTenantRpc(
+  base: TenantContext,
+  raw: HostnameTenantRpc | null | undefined
+): TenantContext | null {
+  if (!raw?.portal_type || !PORTAL_TYPES.has(raw.portal_type as PortalType)) return null;
+  const portalType = raw.portal_type as PortalType;
+  const brandSlug = raw.brand_slug?.trim().toLowerCase() || null;
+  if (!brandSlug && portalType !== "platform") return null;
+
+  return {
+    ...base,
+    portalType,
+    brandId: raw.brand_id ?? null,
+    centerId: portalType === "brand" ? null : (raw.center_id ?? null),
+    brandSlug,
+    centerSlug: portalType === "brand" ? null : (raw.center_slug?.trim().toLowerCase() || null),
+  };
+}
+
 /**
- * Custom domains (e.g. www.smartbraineducations.com) must not keep a hostname-derived
- * brandSlug like "smartbraineducations" / centerSlug "www". Load slugs from mapped IDs.
+ * Custom domains must not keep a hostname-derived brandSlug like "smartbraineducations".
+ * Prefer resolve_hostname_tenant RPC; fall back to brands SELECT when authenticated.
  */
 export async function resolveSlugsFromDomainMapping(
   supabase: SupabaseClient,
@@ -109,6 +141,31 @@ async function resolveTenantScopeOnce(
   const base = resolveTenantFromHost(hostname);
 
   try {
+    const { data: hostnameTenant, error: hostnameError } = await supabase.rpc("resolve_hostname_tenant", {
+      p_hostname: base.hostname,
+    });
+
+    if (!hostnameError && hostnameTenant) {
+      const fromRpc = applyHostnameTenantRpc(
+        base,
+        hostnameTenant as HostnameTenantRpc
+      );
+      if (fromRpc) {
+        const brandSlug = fromRpc.brandSlug;
+        if (!brandSlug || !needsBrandPortalBranding(fromRpc)) return fromRpc;
+
+        const { data, error } = await supabase.rpc("get_portal_branding", {
+          p_brand_slug: brandSlug,
+          p_center_slug: fromRpc.centerSlug,
+        });
+        if (error) return fromRpc;
+
+        const branding = parsePortalBrandingRpc(data);
+        seedPortalBrandingCache(brandSlug, fromRpc.centerSlug, branding);
+        return mergePortalBrandingScope(fromRpc, branding);
+      }
+    }
+
     const { data: mapping, error: mappingError } = await supabase
       .from("domain_mappings")
       .select("hostname, portal_type, brand_id, center_id")
@@ -123,7 +180,6 @@ async function resolveTenantScopeOnce(
       tenant = await resolveSlugsFromDomainMapping(supabase, tenant);
     }
 
-    // Learn/parents must also resolve brandId (Home/Progress use useTenant().brandId).
     const brandSlug = tenant.brandSlug;
     if (!brandSlug || !needsBrandPortalBranding(tenant)) return tenant;
 
