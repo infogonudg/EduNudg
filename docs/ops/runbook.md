@@ -73,7 +73,7 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
 2. Set `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (same cloud project or production project)
 3. **Portal hosts** — pick one:
    - **Same-origin (default on `*.vercel.app`)**: leave `VITE_PORTAL_BASE_DOMAIN` unset. Brand / Franchise / Student portals open on the same URL with `?portal=&brand=` (and `center=` when needed). Platform **Brand backend** handoff uses this automatically.
-   - **Real multi-host**: set `VITE_PORTAL_BASE_DOMAIN=yourdomain.com`, add wildcard DNS `*.yourdomain.com` → Vercel, and map hosts in `domain_mappings` (seed rows still use `*.localhost` for local; the SPA rewrites them when the base domain is set).
+   - **Real multi-host / purchased brand domain**: add the host in Vercel Domains, DNS at the registrar, and `domain_mappings` (hostname → brand, `portal_type = brand`). The SPA loads the brand **slug from `brands` via the mapped `brand_id`** — do not rely on hostname labels (e.g. `smartbraineducations.com` must resolve `smart-brain-abacus`, not a fake slug `smartbraineducations`). Optional: `VITE_PORTAL_BASE_DOMAIN=yourdomain.com` + wildcard `*.yourdomain.com` for center/learn subdomains (seed rows still use `*.localhost` for local).
 4. Supabase Auth → add production Site URL / Redirect URLs for `https://edunudg-hub.vercel.app/**` (and custom domains when used)
 
 **Client demo URLs (Smart Brain Abacus on Vercel):** [demo-smart-brain-abacus-urls.md](./demo-smart-brain-abacus-urls.md)

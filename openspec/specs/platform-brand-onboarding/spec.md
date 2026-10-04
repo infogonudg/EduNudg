@@ -49,6 +49,15 @@ Traceability: FR-P03, FR-P04
 - **AND** creates a `brand_owner` membership and auth invite for the signup email
 - **AND** the brand owner can log in at `{slug-host}/login` and reach `/app`
 
+#### Scenario: Purchased custom domain serves the mapped brand landing
+
+- **GIVEN** `domain_mappings` maps `www.example.com` (or apex) to a brand with slug `smart-brain-abacus` and `portal_type = brand`
+- **AND** that hostname is attached to the Vercel project (DNS valid)
+- **WHEN** a visitor opens `https://www.example.com`
+- **THEN** the SPA SHALL resolve `brandSlug` to `smart-brain-abacus` from the mapped `brand_id` (not from the domain label)
+- **AND** SHALL render that brand’s public landing (same content as `/?portal=brand&brand=smart-brain-abacus` on the platform host)
+- **AND** SHALL NOT invent a brand slug from the first DNS label (e.g. `smartbraineducations`)
+
 #### Scenario: Slug collision on approve
 
 - **WHEN** the generated slug already exists for another brand

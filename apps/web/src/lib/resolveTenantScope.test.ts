@@ -1,13 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { TenantContext } from "@edunudg/tenant";
 import {
   mergePortalBrandingScope,
   needsBrandPortalBranding,
   needsPortalScopeIds,
+  resolveSlugsFromDomainMapping,
+  resolveTenantScope,
 } from "./resolveTenantScope";
 
 const ABACUSWORLD_BRAND_ID = "a0000000-0000-4000-8000-000000000001";
 const KORAMANGALA_CENTER_ID = "b0000000-0000-4000-8000-000000000001";
+const SMART_BRAIN_BRAND_ID = "8db8ffa0-b77b-419d-89bb-baa9efd565f9";
 
 function brandHostTenant(): TenantContext {
   return {
@@ -122,5 +125,97 @@ describe("resolveTenantScope helpers", () => {
     });
     expect(merged.brandId).toBe("c0000000-0000-4000-8000-000000000011");
     expect(needsPortalScopeIds(merged)).toBe(false);
+  });
+
+  it("regression_custom_domain_mapping_loads_real_brand_slug_not_hostname_label", async () => {
+    const fromHost: TenantContext = {
+      hostname: "www.smartbraineducations.com",
+      portalType: "brand",
+      brandId: SMART_BRAIN_BRAND_ID,
+      centerId: null,
+      brandSlug: "smartbraineducations",
+      centerSlug: "www",
+    };
+
+    const supabase = {
+      from: (table: string) => {
+        if (table !== "brands") throw new Error(`unexpected table ${table}`);
+        return {
+          select: () => ({
+            eq: () => ({
+              maybeSingle: async () => ({ data: { slug: "smart-brain-abacus" }, error: null }),
+            }),
+          }),
+        };
+      },
+    };
+
+    const resolved = await resolveSlugsFromDomainMapping(supabase as never, fromHost);
+
+    expect(resolved.brandSlug).toBe("smart-brain-abacus");
+    expect(resolved.centerSlug).toBeNull();
+    expect(resolved.centerId).toBeNull();
+    expect(resolved.portalType).toBe("brand");
+  });
+
+  it("regression_custom_apex_domain_scope_uses_mapped_brand_slug", async () => {
+    const rpc = vi.fn().mockResolvedValue({
+      data: {
+        brand_id: SMART_BRAIN_BRAND_ID,
+        brand_slug: "smart-brain-abacus",
+        brand_name: "Smart Brain Abacus",
+        brand_logo_url: null,
+        center_id: null,
+        center_slug: null,
+        center_name: null,
+        login_headline: null,
+        login_subtext: null,
+      },
+      error: null,
+    });
+
+    const supabase = {
+      from: (table: string) => {
+        if (table === "domain_mappings") {
+          return {
+            select: () => ({
+              eq: () => ({
+                maybeSingle: async () => ({
+                  data: {
+                    hostname: "smartbraineducations.com",
+                    portal_type: "brand",
+                    brand_id: SMART_BRAIN_BRAND_ID,
+                    center_id: null,
+                  },
+                  error: null,
+                }),
+              }),
+            }),
+          };
+        }
+        if (table === "brands") {
+          return {
+            select: () => ({
+              eq: () => ({
+                maybeSingle: async () => ({ data: { slug: "smart-brain-abacus" }, error: null }),
+              }),
+            }),
+          };
+        }
+        throw new Error(`unexpected table ${table}`);
+      },
+      rpc,
+    };
+
+    const tenant = await resolveTenantScope(supabase as never, "smartbraineducations.com");
+
+    expect(tenant.portalType).toBe("brand");
+    expect(tenant.brandSlug).toBe("smart-brain-abacus");
+    expect(tenant.brandId).toBe(SMART_BRAIN_BRAND_ID);
+    expect(tenant.centerSlug).toBeNull();
+    expect(rpc).toHaveBeenCalledWith("get_portal_branding", {
+      p_brand_slug: "smart-brain-abacus",
+      p_center_slug: null,
+    });
   });
 });

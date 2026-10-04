@@ -63,6 +63,45 @@ export function mergePortalBrandingScope(tenant: TenantContext, branding: Portal
   };
 }
 
+/**
+ * Custom domains (e.g. www.smartbraineducations.com) must not keep a hostname-derived
+ * brandSlug like "smartbraineducations" / centerSlug "www". Load slugs from mapped IDs.
+ */
+export async function resolveSlugsFromDomainMapping(
+  supabase: SupabaseClient,
+  tenant: TenantContext
+): Promise<TenantContext> {
+  let next = { ...tenant };
+
+  if (next.brandId) {
+    const { data: brand, error } = await supabase
+      .from("brands")
+      .select("slug")
+      .eq("id", next.brandId)
+      .maybeSingle();
+    if (!error && brand?.slug) {
+      next = { ...next, brandSlug: String(brand.slug).toLowerCase() };
+    }
+  }
+
+  if (next.portalType === "brand") {
+    return { ...next, centerId: null, centerSlug: null };
+  }
+
+  if (next.centerId) {
+    const { data: center, error } = await supabase
+      .from("franchise_centers")
+      .select("slug")
+      .eq("id", next.centerId)
+      .maybeSingle();
+    if (!error && center?.slug) {
+      next = { ...next, centerSlug: String(center.slug).toLowerCase() };
+    }
+  }
+
+  return next;
+}
+
 async function resolveTenantScopeOnce(
   supabase: SupabaseClient,
   hostname: string
@@ -79,6 +118,10 @@ async function resolveTenantScopeOnce(
     let tenant = mappingError
       ? base
       : mergeDomainMapping(base, mapping as DomainMappingRow | null);
+
+    if (mapping && !mappingError) {
+      tenant = await resolveSlugsFromDomainMapping(supabase, tenant);
+    }
 
     // Learn/parents must also resolve brandId (Home/Progress use useTenant().brandId).
     const brandSlug = tenant.brandSlug;
