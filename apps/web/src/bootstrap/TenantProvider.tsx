@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { useLocation } from "react-router-dom";
 import type { TenantContext } from "@edunudg/tenant";
 import { isPlatformHost, resolveTenantFromHost } from "@edunudg/tenant";
+import { usesSameOriginPortals } from "@/lib/brandPortalUrl";
 import { getSupabase } from "@/lib/supabase";
 import { resolveTenantScope } from "@/lib/resolveTenantScope";
 import {
@@ -18,8 +19,9 @@ const TenantCtx = createContext<TenantContext | null>(null);
 function lookupHostnameForResolution(override: PortalOverride | null): string {
   const host = window.location.hostname;
   if (!override) return host;
-  // Same-origin / platform hosts: resolve against synthetic *.localhost mappings in DB.
-  if (isPlatformHost(host)) {
+  // Same-origin (Vercel + brand custom domains): honor ?portal=&center= via synthetic *.localhost mappings.
+  // Without this, smartbraineducations.com always resolves as the brand and every center link looks identical.
+  if (usesSameOriginPortals(host) || isPlatformHost(host)) {
     return syntheticLookupHostname(override);
   }
   return host;

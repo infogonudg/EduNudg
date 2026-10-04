@@ -1,4 +1,5 @@
-import { isPlatformHost, resolveTenantFromHost, type PortalType } from "@edunudg/tenant";
+import { resolveTenantFromHost, type PortalType } from "@edunudg/tenant";
+import { usesSameOriginPortals } from "./brandPortalUrl";
 import { parsePortalOverrideFromSearch, syntheticLookupHostname } from "./portalOverride";
 import {
   BRAND_LEGAL_PAGE_KINDS,
@@ -26,7 +27,8 @@ import type { PublicSitemapInput } from "./publicSeoDiscovery";
 export function resolveSeoTenant(hostname: string, search = ""): { portal: PublicSeoPortal; brandSlug: string | null; centerSlug: string | null } {
   const host = hostname.split(":")[0].toLowerCase();
   const override = parsePortalOverrideFromSearch(search);
-  const lookup = override && isPlatformHost(host) ? syntheticLookupHostname(override) : host;
+  const lookup =
+    override && usesSameOriginPortals(host) ? syntheticLookupHostname(override) : host;
   const tenant = resolveTenantFromHost(lookup);
   return {
     portal: tenant.portalType as PublicSeoPortal,

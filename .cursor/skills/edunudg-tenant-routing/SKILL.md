@@ -29,6 +29,7 @@ Learn Home/Progress use `useTenant().brandId`. If learn skips branding, `brandId
 ## Vercel / single-host
 
 - Without `VITE_PORTAL_BASE_DOMAIN`, **any** non-local host (including `*.vercel.app` and brand custom domains like `smartbraineducations.com`) uses same-origin portals via `?portal=&brand=` (`usesSameOriginPortals` in `brandPortalUrl.ts`, `portalOverride.ts`). Never emit `{center}.{brand}.localhost` from Franchise **View Frontend** / **View Backend** on those hosts.
+- `TenantProvider` MUST resolve portal overrides with `syntheticLookupHostname` on same-origin hosts (not only `isPlatformHost`). Otherwise a brand custom domain ignores `?portal=center&center=…` and every franchise link shows the brand site.
 - With `VITE_PORTAL_BASE_DOMAIN=example.com`, rewrite `*.localhost` mappings to `*.example.com` and use real subdomains (requires wildcard DNS on Vercel).
 - Redeploy Edge Function `platform-portal-handoff` so it preserves portal query params.
 - Login links MUST use `portalLoginUrl` / `learnPortalLoginUrl` (path `/login` **before** `?portal=`). Never append `/login` onto a same-origin URL that already has a query string — that produces `brand=slug/login`.

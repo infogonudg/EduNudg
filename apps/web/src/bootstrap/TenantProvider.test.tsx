@@ -115,4 +115,42 @@ describe("TenantProvider portal re-resolution", () => {
     });
     expect(screen.getByTestId("brand-slug").textContent).toBe("smart-brain-abacus");
   });
+
+  it("regression_custom_brand_domain_honors_center_portal_query", async () => {
+    Object.defineProperty(window, "location", {
+      configurable: true,
+      value: {
+        ...window.location,
+        hostname: "www.smartbraineducations.com",
+        pathname: "/",
+        search: "?portal=center&brand=smart-brain-abacus&center=bhagyashri-dhonde",
+      },
+    });
+
+    const router = createMemoryRouter(
+      [
+        {
+          path: "*",
+          element: (
+            <TenantProvider>
+              <TenantProbe />
+            </TenantProvider>
+          ),
+        },
+      ],
+      {
+        initialEntries: [
+          "/?portal=center&brand=smart-brain-abacus&center=bhagyashri-dhonde",
+        ],
+      }
+    );
+
+    render(<RouterProvider router={router} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("portal-type").textContent).toBe("center");
+    });
+    expect(screen.getByTestId("brand-slug").textContent).toBe("smart-brain-abacus");
+    expect(screen.getByTestId("center-slug").textContent).toBe("bhagyashri-dhonde");
+  });
 });

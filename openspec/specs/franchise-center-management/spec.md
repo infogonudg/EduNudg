@@ -130,6 +130,7 @@ Brand staff SHALL open the selected franchise public site and staff app from `/a
 - **WHEN** they click **View Frontend** or **View Backend** for a franchise
 - **THEN** the new tab SHALL open same-origin URLs with `?portal=center&brand=…&center=…` (path `/` or `/app`)
 - **AND** the href SHALL NOT use `{center}.{brand}.localhost`
+- **AND** `TenantProvider` SHALL resolve that query to the selected center portal (not keep the brand homepage for every franchise)
 
 ### Requirement: Disable and enable franchise
 
