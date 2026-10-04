@@ -101,7 +101,7 @@ Seed data includes the brand only — no default center. Create centers in the b
 | Center students | https://edunudg-hub.vercel.app/app/students?portal=center&brand=smart-brain-abacus&center={center-slug} |
 | Center settings | https://edunudg-hub.vercel.app/app/settings?portal=center&brand=smart-brain-abacus&center={center-slug} |
 
-**Do not use** `{center}.smart-brain-abacus.localhost:9000/login` on Vercel — that host only works in local `/etc/hosts` + `pnpm dev`. Franchise Identity now links the environment-aware `portalLoginUrl` (same-origin query params on `*.vercel.app`).
+**Do not use** `{center}.smart-brain-abacus.localhost:9000/login` on Vercel or on `smartbraineducations.com` — that host only works in local `/etc/hosts` + `pnpm dev`. Franchise Identity / **View Frontend** / **View Backend** use environment-aware `portalLoginUrl` / `centerPortalUrl` / `portalBackendUrl` (same-origin query params when `VITE_PORTAL_BASE_DOMAIN` is unset).
 
 ---
 

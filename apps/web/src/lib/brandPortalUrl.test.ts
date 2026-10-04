@@ -149,6 +149,32 @@ describe("brandPortalUrl", () => {
     );
   });
 
+  it("regression_brand_custom_domain_center_links_use_same_origin_query", () => {
+    mockLocation("www.smartbraineducations.com", "", "https:");
+    expect(usesSameOriginPortals()).toBe(true);
+    expect(centerPortalUrl("smart-brain-abacus", "bhagyashri-dhonde")).toBe(
+      "https://www.smartbraineducations.com/?portal=center&brand=smart-brain-abacus&center=bhagyashri-dhonde"
+    );
+    expect(
+      portalBackendUrl({
+        portalType: "center",
+        brandSlug: "smart-brain-abacus",
+        centerSlug: "bhagyashri-dhonde",
+      })
+    ).toBe(
+      "https://www.smartbraineducations.com/app?portal=center&brand=smart-brain-abacus&center=bhagyashri-dhonde"
+    );
+    expect(
+      portalLoginUrl({
+        portalType: "center",
+        brandSlug: "smart-brain-abacus",
+        centerSlug: "bhagyashri-dhonde",
+      })
+    ).toBe(
+      "https://www.smartbraineducations.com/login?portal=center&brand=smart-brain-abacus&center=bhagyashri-dhonde"
+    );
+  });
+
   it("regression_rewrites_localhost_domain_mappings_when_base_domain_set", () => {
     vi.stubEnv("VITE_PORTAL_BASE_DOMAIN", "edunudg.com");
     mockLocation("admin.edunudg.com", "", "https:");
