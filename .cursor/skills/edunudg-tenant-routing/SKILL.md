@@ -9,7 +9,8 @@ description: Host-based tenant resolution and portal routing for EduNudg.
 
 1. `packages/tenant` resolves hostname → `domain_mappings`
 2. `TenantProvider` → `resolveTenantScope` fills `brandId` via `get_portal_branding` for **brand, center, learn, and parents** (not platform only)
-3. React Router mounts platform `/admin`, brand, center, or learn tree
+3. For **custom purchased domains** (e.g. `www.smartbraineducations.com`), after `domain_mappings` sets `brand_id` / `portal_type`, load `brands.slug` (and center slug when needed) from IDs — never keep a hostname-derived fake slug (`smartbraineducations`) or treat `www` as a center. Regression: `regression_custom_domain_mapping_loads_real_brand_slug_not_hostname_label`, `regression_custom_apex_domain_scope_uses_mapped_brand_slug`.
+4. React Router mounts platform `/admin`, brand, center, or learn tree
 
 Learn Home/Progress use `useTenant().brandId`. If learn skips branding, `brandId` stays null, queries never run, and the dashboard is blank even when a course is assigned.
 
