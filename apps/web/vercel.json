@@ -21,7 +21,8 @@
     "deploymentEnabled": {
       "*": false,
       "main": true,
-      "master": true
+      "master": true,
+      "frontendChanges": true
     }
   }
 }

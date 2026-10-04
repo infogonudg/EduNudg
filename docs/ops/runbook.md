@@ -80,7 +80,7 @@ Signed-in platform admin can open **Brand backend** or **Open** on brand detail 
 
 ### Deploy
 
-**Production on `main` / `master`:** Vercel Git auto-deploy is enabled for those branches only (`apps/web/vercel.json` → `git.deploymentEnabled`). Other branches do not auto-deploy.
+**Production on `main` / `master`:** Vercel Git auto-deploy is enabled for those branches (`apps/web/vercel.json` → `git.deploymentEnabled`). **`frontendChanges`** is also enabled so branch domains (e.g. `dev.smartbraineducations.com` assigned to that branch) get Preview deploys labeled with the branch name — not CLI **Head**. All other branches stay off. After enabling, push to `frontendChanges` once, wait for **Ready**, then refresh the domain in Vercel Domains.
 
 **PR previews + optional Actions production:** [`.github/workflows/cd.yml`](../../.github/workflows/cd.yml) uses remote Vercel builds when repository secrets are set. If secrets are missing, CD skips the CLI deploy with a warning (does not fail on empty `--token=`). CD `setup-node` must set `package-manager-cache: false` (and must not set `cache: pnpm`) — those jobs never install pnpm; v5 otherwise auto-detects `packageManager` in root `package.json` and fails with `Unable to locate executable file: pnpm`, then Post Run cache save fails with `Path Validation Error`.
 
