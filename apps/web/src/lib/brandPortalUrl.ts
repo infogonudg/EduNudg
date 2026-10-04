@@ -33,12 +33,12 @@ export function isLocalDevHost(hostname = currentHostname()): boolean {
   return host === "localhost" || host === "127.0.0.1" || host.endsWith(".localhost");
 }
 
-/** Apex domain for real multi-host portals (e.g. edunudg.com). Empty → same-origin mode on platform hosts. */
-export function getPortalBaseDomain(): string {
+/** Apex domain for real multi-host portals (e.g. edunudg.com). Empty → same-origin mode. */
+export function getPortalBaseDomain(hostname = currentHostname()): string {
   const fromEnv = import.meta.env.VITE_PORTAL_BASE_DOMAIN?.trim().toLowerCase() ?? "";
   if (fromEnv) return fromEnv.replace(/^\.+|\.+$/g, "");
 
-  const host = currentHostname();
+  const host = hostname.split(":")[0].toLowerCase();
   if (isLocalDevHost(host)) return "localhost";
 
   const parts = host.split(".");
@@ -54,10 +54,10 @@ export function getPortalBaseDomain(): string {
  * Used on Vercel *.vercel.app and brand custom domains (e.g. smartbraineducations.com) until
  * VITE_PORTAL_BASE_DOMAIN enables real multi-host subdomains.
  */
-export function usesSameOriginPortals(): boolean {
-  if (isLocalDevHost()) return false;
+export function usesSameOriginPortals(hostname = currentHostname()): boolean {
+  if (isLocalDevHost(hostname)) return false;
   // No wildcard portal base → keep links on this host (never emit *.localhost on Production).
-  return !getPortalBaseDomain();
+  return !getPortalBaseDomain(hostname);
 }
 
 /** Rewrite seed/RPC `*.localhost` hosts to the current environment's portal base domain. */
