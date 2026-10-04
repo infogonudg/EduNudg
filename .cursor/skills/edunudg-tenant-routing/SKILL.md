@@ -10,7 +10,8 @@ description: Host-based tenant resolution and portal routing for EduNudg.
 1. `packages/tenant` resolves hostname → `domain_mappings`
 2. `TenantProvider` → `resolveTenantScope` fills `brandId` via `get_portal_branding` for **brand, center, learn, and parents** (not platform only)
 3. For **custom purchased domains**, call SECURITY DEFINER RPC `resolve_hostname_tenant(hostname)` (migration `108`) so **anon** gets `brand_slug` / `center_slug`. Direct `brands` SELECT is authenticated-only RLS — without the RPC, public visitors keep a fake hostname slug and load the wrong theme. Regressions: `regression_custom_domain_mapping_loads_real_brand_slug_not_hostname_label`, `regression_custom_apex_domain_scope_uses_mapped_brand_slug`.
-4. React Router mounts platform `/admin`, brand, center, or learn tree
+4. Platform admins add/remove brand hostnames from `/admin/brands/:slug` **Domains** via `upsert_brand_domain_mapping` / `delete_brand_domain_mapping` (`109`) — not SQL. Vercel Domains + registrar DNS remain ops outside the app.
+5. React Router mounts platform `/admin`, brand, center, or learn tree
 
 Learn Home/Progress use `useTenant().brandId`. If learn skips branding, `brandId` stays null, queries never run, and the dashboard is blank even when a course is assigned.
 

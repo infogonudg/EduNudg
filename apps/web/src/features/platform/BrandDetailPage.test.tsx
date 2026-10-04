@@ -337,6 +337,8 @@ describe("BrandDetailPage", () => {
     });
 
     renderDetail("smart-brain-abacus");
+    expect(await screen.findByRole("heading", { name: "Existing custom domains" })).toBeDefined();
+    fireEvent.click(await screen.findByRole("button", { name: /Local \/ seed hostnames/i }));
     expect(await screen.findByText(/learn\.smart-brain-abacus\.localhost/)).toBeDefined();
     await waitFor(() => {
       expect(screen.getAllByRole("button", { name: "Open" })).toHaveLength(3);
@@ -491,9 +493,11 @@ describe("BrandDetailPage", () => {
 
     renderDetail("smart-brain-abacus");
     expect(await screen.findByText(/^Center 1$/)).toBeDefined();
-    expect(screen.getByText("host-1.example.com — brand (primary)")).toBeDefined();
+    expect(screen.getByText("host-1.example.com")).toBeDefined();
+    expect(screen.getByText("brand")).toBeDefined();
+    expect(screen.getByText("primary")).toBeDefined();
     expect(screen.queryByText(/^Center 11$/)).toBeNull();
-    expect(screen.queryByText("host-11.example.com — center")).toBeNull();
+    expect(screen.queryByText("host-11.example.com")).toBeNull();
 
     const centersNav = screen.getByRole("navigation", { name: "Franchise centers pagination" });
     expect(within(centersNav).getByText("1–10 of 12")).toBeDefined();
@@ -504,7 +508,7 @@ describe("BrandDetailPage", () => {
     const domainsNav = screen.getByRole("navigation", { name: "Domains pagination" });
     expect(within(domainsNav).getByText("1–10 of 12")).toBeDefined();
     fireEvent.click(within(domainsNav).getByRole("button", { name: "Next page" }));
-    expect(await screen.findByText("host-11.example.com — center")).toBeDefined();
-    expect(screen.queryByText("host-1.example.com — brand (primary)")).toBeNull();
+    expect(await screen.findByText("host-11.example.com")).toBeDefined();
+    expect(screen.queryByText("host-1.example.com")).toBeNull();
   });
 });
