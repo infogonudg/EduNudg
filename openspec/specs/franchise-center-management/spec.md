@@ -65,7 +65,7 @@ Brand `/app/centers` SHALL NOT show or edit franchise social media. Profile Save
 
 ### Requirement: Center owner login credentials
 
-Brand staff SHALL view and set the franchise center login email and password from Franchise Identity on `/app/centers`. Credentials SHALL provision Supabase Auth and an active `center_owner` membership so the same email/password work on the center host `/login`. Login email SHALL NOT be stored on `franchise_centers`; source of truth is Auth + `profiles` + memberships. Profile-only saves SHALL NOT call `center-owner-credentials`. Franchise Identity helper text SHALL show an environment-aware login URL via `portalLoginUrl` (local `{center}.{brand}.localhost:9000/login`; Vercel same-origin `/login?portal=center&brand=…&center=…`) — never a hardcoded localhost host when the brand app is on `*.vercel.app`.
+Brand staff SHALL view and set the franchise center login email and password from Franchise Identity on `/app/centers`. Credentials SHALL provision Supabase Auth and an active `center_owner` membership so the same email/password work on the center host `/login`. Login email SHALL NOT be stored on `franchise_centers`; source of truth is Auth + `profiles` + memberships. Profile-only saves SHALL NOT call `center-owner-credentials`. Franchise Identity helper text SHALL show an environment-aware login URL via `portalLoginUrl` (local `{center}.{brand}.localhost:9000/login`; same-origin `/login?portal=center&brand=…&center=…` on `*.vercel.app` and brand custom domains). **View Frontend** / **View Backend** SHALL use `centerPortalUrl` / `portalBackendUrl` the same way — never `{center}.{brand}.localhost` when the brand app is on a production custom domain without `VITE_PORTAL_BASE_DOMAIN`.
 
 #### Scenario: Show login email from database
 
@@ -123,6 +123,14 @@ Brand staff SHALL open the selected franchise public site and staff app from `/a
 - **GIVEN** brand staff have a franchise selected
 - **WHEN** they click **View Frontend** or **View Backend**
 - **THEN** the browser opens the center marketing URL or center `/app` in a new tab
+
+#### Scenario: Custom brand domain avoids localhost center hosts
+
+- **GIVEN** brand staff are on a purchased brand host without `VITE_PORTAL_BASE_DOMAIN` (e.g. `www.smartbraineducations.com/app/centers`)
+- **WHEN** they click **View Frontend** or **View Backend** for a franchise
+- **THEN** the new tab SHALL open same-origin URLs with `?portal=center&brand=…&center=…` (path `/` or `/app`)
+- **AND** the href SHALL NOT use `{center}.{brand}.localhost`
+- **AND** `TenantProvider` SHALL resolve that query to the selected center portal (not keep the brand homepage for every franchise)
 
 ### Requirement: Disable and enable franchise
 

@@ -16,7 +16,7 @@ Platform admins (`platform_super_admin`) can open any brand, center, learn, or p
 2. SPA calls Edge Function `platform-portal-handoff` with `redirectTo` = `{origin}/auth/handoff?next={path}`.
 3. Edge Function validates `is_platform_admin()`, generates `hashed_token` via `auth.admin.generateLink`.
 4. Browser opens `{origin}/auth/handoff?token_hash=…&next=…` on the **target host** (e.g. `smart-brain-abacus.localhost:9000`).
-5. On single-host deploys (`*.vercel.app` without `VITE_PORTAL_BASE_DOMAIN`), step 2 uses the **platform origin** plus `portal` / `brand` / `center` query params instead of `*.localhost`.
+5. On single-host deploys (`*.vercel.app` or a brand custom domain without `VITE_PORTAL_BASE_DOMAIN`), step 2 uses the **current origin** plus `portal` / `brand` / `center` query params instead of `*.localhost`.
 6. `AuthHandoffPage` runs `supabase.auth.verifyOtp({ token_hash, type: 'magiclink' })`, persists the portal override, and navigates to `next` (`/app` for brand/center, `/` for learn/parents).
 
 ## Code map
