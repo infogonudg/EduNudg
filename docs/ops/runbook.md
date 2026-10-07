@@ -118,6 +118,8 @@ node -p "require('./apps/web/.vercel/project.json').projectId" | gh secret set V
 
 CD uploads source with `vercel deploy` so Vercel performs the build with protected environment variables available. Manual re-run: Actions → CD → **Run workflow**.
 
+GitHub Actions installs a **pinned** Vercel CLI (`vercel@62.5.0` in `.github/workflows/cd.yml`), not `@latest`. npm sometimes advertises a newer `latest` whose tarball is missing (`E404 …/vercel-….tgz`); bump the pin only after `npm view vercel@<version> dist.tarball` returns a URL that downloads successfully.
+
 After Actions secrets work, you can turn off Git production deploys to avoid double builds by setting `"git": { "deploymentEnabled": false }` in `apps/web/vercel.json`.
 
 Do **not** put empty values in a GitHub Environment named `production` for these keys — empty environment secrets override repo secrets.
