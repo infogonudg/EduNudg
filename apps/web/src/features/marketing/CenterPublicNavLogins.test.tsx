@@ -48,8 +48,10 @@ describe("CenterPublicNavLogins", () => {
       </MemoryRouter>
     );
     const link = screen.getByRole("link", { name: "Student Login" });
+    // Pretty path keeps slug segments before any query (never brand=…/login).
     expect(link.getAttribute("href")).toBe(
-      "https://edunudg-hub.vercel.app/login?portal=learn&brand=smart-brain-abacus&center=smart-brain-abacus"
+      "https://edunudg-hub.vercel.app/b/smart-brain-abacus/centers/smart-brain-abacus/student-login"
     );
+    expect(link.getAttribute("href")).not.toMatch(/brand=[^&]*\/login/);
   });
 });

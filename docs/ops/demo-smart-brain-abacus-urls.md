@@ -13,7 +13,7 @@ On `*.vercel.app` (same-origin mode), every brand/center/learn URL needs `portal
 **Wrong:** `...?brand=smart-brain-abacus/login` — `/login` becomes part of the slug.  
 **Right:** `.../login?portal=brand&brand=smart-brain-abacus`
 
-Franchise **Student Login** and **Copy Profile URL** use `learnPortalLoginUrl` → `/login?portal=learn&brand=smart-brain-abacus&center={center}` (path before `?`; never append `/login` after the query). Regression: `regression_vercel_student_login_uses_path_before_portal_query`. Learn `/login` loads that franchise’s public nav/footer from the center slug (`regression_learn_login_renders_franchise_nav_and_footer`).
+Franchise **Student Login** and **Copy Profile URL** use `learnPortalLoginUrl` → on Vercel `/b/smart-brain-abacus/centers/{center}/student-login` (pretty path; never append `/login` after a `brand=` query). Without a center slug, fallback is `/login?portal=learn&brand=smart-brain-abacus`. Regression: `regression_vercel_student_login_uses_path_before_portal_query`. Learn `/login` (and pretty student-login routes) load that franchise’s public nav/footer from the center slug (`regression_learn_login_renders_franchise_nav_and_footer`).
 
 See also: [platform-admin-portal-handoff.md](./platform-admin-portal-handoff.md), [test-users.md](./test-users.md), [runbook.md](./runbook.md).
 

@@ -52,7 +52,8 @@ Center student detail **Portal access** SHALL prefill Login email with `students
 - **THEN** **Portal access** has **Copy Profile URL**
 - **AND** it copies the student/parent learn-portal login URL (`learnPortalLoginUrl`) to the clipboard
 - **AND** the copied URL does not include a password
-- **AND** on Vercel same-origin hosts the URL is `/login?portal=learn&brand=…` (path before `?`), never `?portal=learn&brand=…/login`
+- **AND** on Vercel same-origin hosts with a known center the URL is `/b/{brand}/centers/{center}/student-login` (never `?portal=learn&brand=…/login`)
+- **AND** without a center slug the fallback remains `/login?portal=learn&brand=…` (path before `?`)
 
 ### Requirement: Franchise Student Login nav link
 
@@ -60,10 +61,10 @@ Center public **Student Login** SHALL use `learnPortalLoginUrl` so local multi-h
 
 #### Scenario: Student Login on Vercel same-origin
 
-- **GIVEN** a franchise public site on `*.vercel.app` with `?portal=center&brand=…&center=…`
+- **GIVEN** a franchise public site on `*.vercel.app` with a known brand and center slug
 - **WHEN** a visitor clicks **Student Login**
-- **THEN** the href is `/login?portal=learn&brand={brandSlug}` on the same origin
-- **AND** `/login` is the path, not a suffix on the `brand` query value
+- **THEN** the href is `/b/{brandSlug}/centers/{centerSlug}/student-login` on the same origin
+- **AND** the path never appends `/login` onto a `brand=` query value
 
 ### Requirement: Delivery address save feedback
 

@@ -58,9 +58,10 @@ jobs:
           node-version: "24"
           package-manager-cache: false
 
+      # Pin CLI — @latest can resolve to a version whose tarball is not yet on the registry (E404).
       - name: Install Vercel CLI
         if: steps.secrets.outputs.ready == 'true'
-        run: npm install --global vercel@latest
+        run: npm install --global vercel@62.5.0
 
       - name: Pull Vercel environment
         if: steps.secrets.outputs.ready == 'true'
@@ -146,9 +147,10 @@ jobs:
           node-version: "24"
           package-manager-cache: false
 
+      # Pin CLI — @latest can resolve to a version whose tarball is not yet on the registry (E404).
       - name: Install Vercel CLI
         if: steps.secrets.outputs.ready == 'true'
-        run: npm install --global vercel@latest
+        run: npm install --global vercel@62.5.0
 
       - name: Pull Vercel environment
         if: steps.secrets.outputs.ready == 'true'
