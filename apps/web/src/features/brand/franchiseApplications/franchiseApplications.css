@@ -474,13 +474,22 @@
 .ed-franchise-app-detail__hero {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.875rem 1rem;
   padding: 1.125rem 1.25rem;
   border: 1px solid var(--ed-border);
   border-radius: var(--ed-franchise-apps-radius);
   background: var(--ed-card);
   box-shadow: var(--ed-shadow);
+}
+
+.ed-franchise-app-detail__hero-identity {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1 1 14rem;
+  min-width: 0;
 }
 
 .ed-franchise-app-detail__hero-icon {
@@ -514,36 +523,24 @@
 }
 
 .ed-franchise-app-detail__hero-actions {
-  display: none;
-}
-
-.ed-franchise-app-detail__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.625rem;
-}
-
-@media (min-width: 1024px) {
-  .ed-franchise-app-detail__actions {
-    position: absolute;
-    top: 1.125rem;
-    right: 1.25rem;
-    z-index: 1;
-  }
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex: 1 1 16rem;
+  max-width: 100%;
+  min-width: 0;
 }
 
 @media (max-width: 1023px) {
-  .ed-franchise-app-detail__actions {
-    position: sticky;
-    bottom: 0;
-    margin-top: 0.25rem;
-    padding: 0.75rem 0 calc(0.75rem + env(safe-area-inset-bottom, 0px));
-    background: linear-gradient(180deg, transparent, var(--ed-bg) 24%);
+  .ed-franchise-app-detail__hero-actions {
+    flex: 1 1 100%;
+    justify-content: stretch;
   }
 
-  .ed-franchise-app-detail__actions > * {
-    flex: 1;
+  .ed-franchise-app-detail__hero-actions > * {
+    flex: 1 1 auto;
   }
 }
 

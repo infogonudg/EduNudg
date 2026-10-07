@@ -67,7 +67,8 @@ See [manual-leads.md](./manual-leads.md).
 | `reopen_lead(p_lead_id)` | **Brand only** — `lost` → `new`; audit event preserves prior reason |
 | `record_platform_payment(...)` | Edge/webhook — subscription payment settled |
 | `create_brand_subscription_checkout(...)` | Brand billing UI — payment gateway session |
-| `approve_franchise_inquiry(p_inquiry_id, ...)` | Center + `{center}.{brand}` domain + operator membership |
+| `update_franchise_inquiry(p_inquiry_id, …)` | Brand staff edit pending inquiry fields before approve (`111`) |
+| `approve_franchise_inquiry(p_inquiry_id, ...)` | Center + `{center}.{brand}` domain + operator membership; slug uniqueness includes soft-deleted rows (`110`) |
 | `reject_franchise_inquiry(p_inquiry_id, p_reason)` | |
 
 ## Center staff

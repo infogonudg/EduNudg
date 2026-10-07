@@ -60,7 +60,7 @@ RPC `set_franchise_center_status` — brand-only `active` ↔ `suspended` (Disab
 | `leads` | brand / center | Student pipeline; `lead_source` brand \| center; nullable `center_id`; optional CSV-aligned `login_email`, `address_line1`, `state`, `program_name`, `starting_level` (migration `090`; do not reuse prefix `089`) |
 | `lead_events` | brand | Merge, lost, reopen, assign audit |
 | `lead_assignment_history` | brand | Center reassignments |
-| `franchise_inquiries` | brand | Prospective franchisee applications. Soft-deleting the converted center does not delete the inquiry; Franchise Applications shows it on **Decided** with a DELETED badge. |
+| `franchise_inquiries` | brand | Prospective franchisee applications. Brand staff may edit pending rows via `update_franchise_inquiry` (`111`) before approve. Soft-deleting the converted center does not delete the inquiry; Franchise Applications shows it on **Decided** with a DELETED badge. |
 
 ## Students
 
