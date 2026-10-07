@@ -90,9 +90,7 @@ describe("brandPortalUrl", () => {
         brandSlug: "smart-brain-abacus",
         centerSlug: "center-2",
       })
-    ).toBe(
-      "https://edunudg-hub.vercel.app/login?portal=center&brand=smart-brain-abacus&center=center-2"
-    );
+    ).toBe("https://edunudg-hub.vercel.app/b/smart-brain-abacus/centers/center-2/login");
   });
 
   it("regression_portal_handoff_login_url_includes_next_path", () => {
@@ -170,9 +168,7 @@ describe("brandPortalUrl", () => {
         brandSlug: "smart-brain-abacus",
         centerSlug: "bhagyashri-dhonde",
       })
-    ).toBe(
-      "https://www.smartbraineducations.com/login?portal=center&brand=smart-brain-abacus&center=bhagyashri-dhonde"
-    );
+    ).toBe("https://www.smartbraineducations.com/centers/bhagyashri-dhonde/login");
   });
 
   it("regression_rewrites_localhost_domain_mappings_when_base_domain_set", () => {

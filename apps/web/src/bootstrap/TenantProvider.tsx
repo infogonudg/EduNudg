@@ -7,8 +7,11 @@ import { getSupabase } from "@/lib/supabase";
 import { resolveTenantScope } from "@/lib/resolveTenantScope";
 import {
   clearPortalOverride,
+  isShortCenterPrettyLoginPath,
+  parsePortalOverrideFromPath,
   parsePortalOverrideFromSearch,
   readStickyPortalOverride,
+  shortCenterPrettyLoginLeaf,
   syntheticLookupHostname,
   writePortalOverride,
   type PortalOverride,
@@ -19,16 +22,17 @@ const TenantCtx = createContext<TenantContext | null>(null);
 function lookupHostnameForResolution(override: PortalOverride | null): string {
   const host = window.location.hostname;
   if (!override) return host;
-  // Same-origin (Vercel + brand custom domains): honor ?portal=&center= via synthetic *.localhost mappings.
-  // Without this, smartbraineducations.com always resolves as the brand and every center link looks identical.
+  // Same-origin (Vercel + brand custom domains): honor ?portal=&center= / pretty paths via synthetic *.localhost.
   if (usesSameOriginPortals(host) || isPlatformHost(host)) {
     return syntheticLookupHostname(override);
   }
   return host;
 }
 
-/** Prefer React Router search so in-tab portal switches re-resolve without a full reload. */
-function activePortalOverride(pathname: string, search: string): PortalOverride | null {
+/**
+ * Sync overrides only (search + /b/... paths). Short /centers/... needs async host brand slug.
+ */
+function syncPortalOverride(pathname: string, search: string): PortalOverride | null {
   const hostname = window.location.hostname;
   if (pathname.startsWith("/admin") && isPlatformHost(hostname)) {
     clearPortalOverride();
@@ -41,12 +45,21 @@ function activePortalOverride(pathname: string, search: string): PortalOverride 
     return fromUrl;
   }
 
-  // Sticky override when the URL has no portal params (e.g. auth bounce before loginPathWithPortal).
+  const fromPath = parsePortalOverrideFromPath(pathname);
+  if (fromPath) {
+    writePortalOverride(fromPath);
+    return fromPath;
+  }
+
+  if (isShortCenterPrettyLoginPath(pathname)) {
+    return null;
+  }
+
   return readStickyPortalOverride();
 }
 
 function portalResolutionKey(pathname: string, search: string): string {
-  const override = activePortalOverride(pathname, search);
+  const override = syncPortalOverride(pathname, search);
   return [
     pathname,
     search,
@@ -58,9 +71,7 @@ function portalResolutionKey(pathname: string, search: string): string {
 
 function initialTenant(): TenantContext {
   return resolveTenantFromHost(
-    lookupHostnameForResolution(
-      activePortalOverride(window.location.pathname, window.location.search)
-    )
+    lookupHostnameForResolution(syncPortalOverride(window.location.pathname, window.location.search))
   );
 }
 
@@ -72,8 +83,6 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    const override = activePortalOverride(location.pathname, location.search);
-    const effectiveLookup = lookupHostnameForResolution(override);
     const timeout = setTimeout(() => {
       if (!cancelled) setReady(true);
     }, 2000);
@@ -84,7 +93,13 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     } catch {
       clearTimeout(timeout);
       if (!cancelled) {
-        setTenant(resolveTenantFromHost(effectiveLookup));
+        setTenant(
+          resolveTenantFromHost(
+            lookupHostnameForResolution(
+              syncPortalOverride(location.pathname, location.search)
+            )
+          )
+        );
         setReady(true);
       }
       return;
@@ -92,10 +107,66 @@ export function TenantProvider({ children }: { children: ReactNode }) {
 
     void (async () => {
       try {
-        const resolved = await resolveTenantScope(supabase, effectiveLookup);
+        const fromSearch = parsePortalOverrideFromSearch(location.search);
+        if (fromSearch) {
+          writePortalOverride(fromSearch);
+          const resolved = await resolveTenantScope(
+            supabase,
+            lookupHostnameForResolution(fromSearch)
+          );
+          if (!cancelled) setTenant(resolved);
+          return;
+        }
+
+        const fromPath = parsePortalOverrideFromPath(location.pathname);
+        if (fromPath) {
+          writePortalOverride(fromPath);
+          const resolved = await resolveTenantScope(
+            supabase,
+            lookupHostnameForResolution(fromPath)
+          );
+          if (!cancelled) setTenant(resolved);
+          return;
+        }
+
+        const short = shortCenterPrettyLoginLeaf(location.pathname);
+        if (short && (usesSameOriginPortals() || !isPlatformHost(window.location.hostname))) {
+          const hostResolved = await resolveTenantScope(supabase, window.location.hostname);
+          const brandSlug = hostResolved.brandSlug?.trim().toLowerCase() ?? "";
+          const withBrand = parsePortalOverrideFromPath(location.pathname, brandSlug);
+          if (withBrand) {
+            writePortalOverride(withBrand);
+            const resolved = await resolveTenantScope(
+              supabase,
+              lookupHostnameForResolution(withBrand)
+            );
+            if (!cancelled) setTenant(resolved);
+            return;
+          }
+        }
+
+        const sticky = readStickyPortalOverride();
+        if (sticky && (usesSameOriginPortals() || isPlatformHost(window.location.hostname))) {
+          const resolved = await resolveTenantScope(
+            supabase,
+            lookupHostnameForResolution(sticky)
+          );
+          if (!cancelled) setTenant(resolved);
+          return;
+        }
+
+        const resolved = await resolveTenantScope(supabase, window.location.hostname);
         if (!cancelled) setTenant(resolved);
       } catch {
-        if (!cancelled) setTenant(resolveTenantFromHost(effectiveLookup));
+        if (!cancelled) {
+          setTenant(
+            resolveTenantFromHost(
+              lookupHostnameForResolution(
+                syncPortalOverride(location.pathname, location.search)
+              )
+            )
+          );
+        }
       } finally {
         clearTimeout(timeout);
         if (!cancelled) setReady(true);

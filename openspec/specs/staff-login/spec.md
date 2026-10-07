@@ -88,6 +88,15 @@ Staff `/login` SHALL NOT sign the user out until memberships for the current use
 - **AND** after platform/brand logout, a center owner or student signing in on that URL SHALL NOT be signed out solely because tenant context stayed `platform`
 - **AND** `/admin` on a platform host SHALL still clear the sticky portal override
 
+#### Scenario: Pretty login paths resolve center and student without query params
+
+- **GIVEN** a same-origin host (brand custom domain or `*.vercel.app`)
+- **WHEN** a visitor opens `/centers/{center}/login` (brand domain) or `/b/{brand}/centers/{center}/login` (Vercel)
+- **THEN** `TenantProvider` SHALL resolve `portalType = center` for that brand/center
+- **AND** `portalLoginUrl` / Franchise Identity SHALL emit those pretty paths
+- **AND** `/centers/{center}/student-login` (or `/b/{brand}/…/student-login`) SHALL resolve `portalType = learn`
+- **AND** legacy `/login?portal=…&brand=…&center=…` SHALL keep working
+
 #### Scenario: Invited brand owner can enter the brand portal
 
 - **GIVEN** a `brand_owner` membership with status `invited` (platform brand signup approved, credentials not yet synced)

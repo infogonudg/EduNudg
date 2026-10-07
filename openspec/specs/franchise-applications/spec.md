@@ -72,6 +72,18 @@ Traceability: FR-B20
 - **AND** on **Decided**, deleted inquiries sort after live approved/rejected rows
 - **AND** the detail view explains the franchise was deleted from Franchise Management and is kept for history
 
+### Requirement: Edit pending franchise inquiry before approve
+
+Brand staff SHALL edit pending website or walk-in applications after discussion so proposed name, location, and notes are complete before approve. Public website apply MAY remain a short form.
+
+#### Scenario: Edit pending application details
+
+- **GIVEN** a pending franchise inquiry (`new`, `contacted`, or `qualified`)
+- **WHEN** brand staff choose **Edit**, update proposed name / city / address / notes, and save
+- **THEN** `update_franchise_inquiry` updates that inquiry for the brand
+- **AND** the detail view shows the saved values
+- **AND** decided (`converted` / `lost`) applications SHALL NOT be editable
+
 ### Requirement: Approve franchise inquiry
 
 Brand staff SHALL approve inquiries to provision a franchise center, domain, and operator invite atomically.
@@ -81,11 +93,19 @@ Traceability: FR-B21
 #### Scenario: Approve inquiry provisions center
 
 - **WHEN** brand staff approve a franchise inquiry
-- **THEN** the system creates a `franchise_centers` row with slug from the proposed name
+- **THEN** the system creates a `franchise_centers` row with slug from the proposed name (fallback city / applicant name)
 - **AND** creates `domain_mappings` for `{center_slug}.{brand_slug}` host
 - **AND** creates center operator membership and auth invite
 - **AND** the center host loads with student registration only (no franchise form)
 - **AND** the franchise operator can log in at center `/app` immediately after approval
+
+#### Scenario: Approve allocates unique slug when city or name already used
+
+- **GIVEN** a brand already has a franchise with slug `pune` (including soft-deleted)
+- **AND** a pending inquiry has empty proposed name and city `pune`
+- **WHEN** brand staff approve that inquiry
+- **THEN** the system SHALL create a center with a non-colliding slug such as `pune-2`
+- **AND** SHALL NOT fail with `franchise_centers_brand_id_slug_key`
 
 #### Scenario: Franchise does not pay EduNudg
 

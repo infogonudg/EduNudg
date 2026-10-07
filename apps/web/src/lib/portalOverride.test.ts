@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
   clearPortalOverride,
+  isPortalPathSlug,
+  parsePortalOverrideFromPath,
   parsePortalOverrideFromSearch,
   readPortalOverride,
   syntheticLookupHostname,
@@ -52,5 +54,32 @@ describe("portalOverride", () => {
     expect(syntheticLookupHostname({ portalType: "learn", brandSlug: "abacusworld" })).toBe(
       "learn.abacusworld.localhost"
     );
+  });
+
+  it("regression_pretty_login_path_parses_center_and_student", () => {
+    expect(isPortalPathSlug("kalyani-gebad")).toBe(true);
+    expect(isPortalPathSlug("../etc")).toBe(false);
+    expect(
+      parsePortalOverrideFromPath("/centers/kalyani-gebad/login", "smart-brain-abacus")
+    ).toEqual({
+      portalType: "center",
+      brandSlug: "smart-brain-abacus",
+      centerSlug: "kalyani-gebad",
+    });
+    expect(
+      parsePortalOverrideFromPath("/centers/kalyani-gebad/student-login", "smart-brain-abacus")
+    ).toEqual({
+      portalType: "learn",
+      brandSlug: "smart-brain-abacus",
+      centerSlug: "kalyani-gebad",
+    });
+    expect(
+      parsePortalOverrideFromPath("/b/smart-brain-abacus/centers/kalyani-gebad/login")
+    ).toEqual({
+      portalType: "center",
+      brandSlug: "smart-brain-abacus",
+      centerSlug: "kalyani-gebad",
+    });
+    expect(parsePortalOverrideFromPath("/centers/kalyani-gebad/login")).toBeNull();
   });
 });

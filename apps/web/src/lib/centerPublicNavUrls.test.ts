@@ -52,9 +52,23 @@ describe("learnPortalLoginUrl", () => {
       "https://edunudg-hub.vercel.app/login?portal=learn&brand=smart-brain-abacus"
     );
     expect(learnPortalLoginUrl("smart-brain-abacus", "smart-brain-abacus")).toBe(
-      "https://edunudg-hub.vercel.app/login?portal=learn&brand=smart-brain-abacus&center=smart-brain-abacus"
+      "https://edunudg-hub.vercel.app/b/smart-brain-abacus/centers/smart-brain-abacus/student-login"
     );
     expect(url).not.toMatch(/brand=[^&]*\/login/);
+  });
+
+  it("regression_custom_domain_student_login_uses_pretty_path", () => {
+    vi.stubGlobal("window", {
+      location: {
+        protocol: "https:",
+        hostname: "dev.smartbraineducations.com",
+        port: "",
+        origin: "https://dev.smartbraineducations.com",
+      },
+    });
+    expect(learnPortalLoginUrl("smart-brain-abacus", "kalyani-gebad")).toBe(
+      "https://dev.smartbraineducations.com/centers/kalyani-gebad/student-login"
+    );
   });
 });
 

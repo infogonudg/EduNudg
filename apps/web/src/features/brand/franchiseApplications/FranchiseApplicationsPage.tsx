@@ -12,7 +12,12 @@ import {
 import { ManualFranchiseInquiryCard } from "@/features/shared/manualLeads/ManualFranchiseInquiryCard";
 import { getSupabase } from "@/lib/supabase";
 import { supabaseList } from "@/lib/supabaseResult";
-import { approveFranchiseInquiry, rejectFranchiseInquiry } from "@/lib/franchiseInquiriesApi";
+import {
+  approveFranchiseInquiry,
+  rejectFranchiseInquiry,
+  updateFranchiseInquiry,
+  type UpdateFranchiseInquiryInput,
+} from "@/lib/franchiseInquiriesApi";
 import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
@@ -161,6 +166,20 @@ export function FranchiseApplicationsPage() {
       void qc.invalidateQueries({ queryKey: ["franchise-inquiries", brandId] });
       void qc.invalidateQueries({ queryKey: ["shell-context-counts"] });
       closeDetail();
+    },
+    onError: capture,
+  });
+
+  const saveEdit = useMutation({
+    mutationFn: async (input: UpdateFranchiseInquiryInput) => {
+      if (!selectedId) return;
+      clear();
+      const { error: err } = await updateFranchiseInquiry(selectedId, input);
+      if (err) throw new Error(err);
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["franchise-inquiries", brandId] });
+      void qc.invalidateQueries({ queryKey: ["shell-context-counts"] });
     },
     onError: capture,
   });
@@ -353,6 +372,7 @@ export function FranchiseApplicationsPage() {
                 setRejectMode(true);
                 setRejectReason("");
               }}
+              onSaveEdit={(input) => saveEdit.mutate(input)}
               rejectMode={rejectMode}
               rejectReason={rejectReason}
               onRejectReasonChange={setRejectReason}
@@ -360,6 +380,7 @@ export function FranchiseApplicationsPage() {
               onCancelAction={resetActionState}
               approvePending={approve.isPending}
               rejectPending={reject.isPending}
+              savePending={saveEdit.isPending}
             />
           ) : isDesktop ? (
             <div className="ed-franchise-apps-page__placeholder">
