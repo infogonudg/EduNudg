@@ -1,4 +1,4 @@
-import { deriveRequestPublicSeo, resolveSeoTenant, sitemapInputFromRequest } from "./publicSeoRequest";
+import { deriveRequestPublicSeo, isVercelPreviewRequest, resolveSeoTenant, sitemapInputFromRequest } from "./publicSeoRequest";
 import { buildAiTxt, buildLlmsTxt, buildRobotsTxt, buildSitemapXml, isPublicDiscoveryPath } from "./publicSeoDiscovery";
 import { injectPublicSeoHead } from "./publicSeoHtml";
 import { loadPublicSeoPageDataRemote, readPublicSeoEnv } from "./publicSeoRemote";
@@ -19,7 +19,7 @@ async function pageArgs(req: Request, pathname: string) {
   const env = readPublicSeoEnv();
   const host = requestHost(req);
   const search = new URL(req.url).search;
-  const tenant = resolveSeoTenant(host, search);
+  const tenant = resolveSeoTenant(host, search, env.portalBaseDomain);
   const data = await loadPublicSeoPageDataRemote(env, tenant.portal, tenant.brandSlug, tenant.centerSlug);
   return {
     hostname: host,
@@ -32,30 +32,45 @@ async function pageArgs(req: Request, pathname: string) {
   };
 }
 
+/** robots / ai.txt only need host + env — never block on Supabase. */
+function discoveryHostInput(req: Request) {
+  const env = readPublicSeoEnv();
+  const host = requestHost(req);
+  const search = new URL(req.url).search;
+  const protocol = requestProtocol(req);
+  const tenant = resolveSeoTenant(host, search, env.portalBaseDomain);
+  return {
+    requestOrigin: `${protocol}://${host}`,
+    portal: tenant.portal,
+    brandSlug: tenant.brandSlug,
+    centerSlug: tenant.centerSlug,
+    portalBaseDomain: env.portalBaseDomain,
+    // Keep Sitemap URL on the host that served robots.txt (apex custom domains).
+    preferredHostname: host,
+    isPreview: isVercelPreviewRequest(host, env.vercelEnv),
+  };
+}
+
 export async function handlePublicSeoDiscovery(req: Request, file: string): Promise<Response> {
   const url = new URL(req.url);
   const kind = file || isPublicDiscoveryPath(url.pathname) || "";
-  const args = await pageArgs(req, "/");
-  const sitemapInput = sitemapInputFromRequest(args);
+  const textHeaders = { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=300" };
+  const xmlHeaders = { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=300" };
+
   if (kind === "robots") {
-    return new Response(buildRobotsTxt(sitemapInput), {
-      headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=300" },
-    });
-  }
-  if (kind === "sitemap") {
-    return new Response(buildSitemapXml(sitemapInput), {
-      headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=300" },
-    });
-  }
-  if (kind === "llms") {
-    return new Response(buildLlmsTxt(sitemapInput), {
-      headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=300" },
-    });
+    return new Response(buildRobotsTxt(discoveryHostInput(req)), { headers: textHeaders });
   }
   if (kind === "ai") {
-    return new Response(buildAiTxt(sitemapInput), {
-      headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=300" },
-    });
+    return new Response(buildAiTxt(discoveryHostInput(req)), { headers: textHeaders });
+  }
+
+  const args = await pageArgs(req, "/");
+  const sitemapInput = sitemapInputFromRequest(args);
+  if (kind === "sitemap") {
+    return new Response(buildSitemapXml(sitemapInput), { headers: xmlHeaders });
+  }
+  if (kind === "llms") {
+    return new Response(buildLlmsTxt(sitemapInput), { headers: textHeaders });
   }
   return new Response("Not found", { status: 404 });
 }

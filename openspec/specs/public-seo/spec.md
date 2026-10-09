@@ -57,6 +57,10 @@ Canonical URLs SHALL use the tenant’s preferred public origin (`VITE_PORTAL_BA
 
 Each public host SHALL serve `/robots.txt`, `/sitemap.xml`, `/llms.txt`, and `/.well-known/ai.txt` **before** the SPA catch-all. Sitemaps SHALL list published routes and course slugs only — never `/login`, homepage hashes, unpublished About, or invented `/shop` / `/contact` routes.
 
+`/api/public-seo` SHALL resolve tenants with Node-safe same-origin helpers (`portalSameOrigin`) — it MUST NOT import browser `brandPortalUrl` (`window` / `@/` aliases). `/robots.txt` and `/.well-known/ai.txt` SHALL build from host + env only (no Supabase round-trip). Handler failures SHALL still return a plain-text robots fallback (not `FUNCTION_INVOCATION_FAILED` when the catch path runs).
+
+Traceability: regression — `regression_public_seo_request_does_not_import_brand_portal_url`, `regression_robots_txt_builds_without_supabase_for_custom_domain`.
+
 #### Scenario: Sitemap omits hashes and login
 
 - **GIVEN** a brand with published courses and unpublished About

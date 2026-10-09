@@ -195,6 +195,7 @@ pnpm test:rls
 - Brand owners edit brand page **content** at `{brand}.localhost:9000/app/homepage`
 - Brand owners edit the center enrollment template at `{brand}.localhost:9000/app/center-site`
 - Public SEO is automatic (`derivePublicSeo`): no extra editor fields. Vercel serves `/robots.txt`, `/sitemap.xml`, `/llms.txt` via `/api/public-seo` and injects head tags through `/api/seo-document` on indexable paths only. `/login` rewrites to `/index.html` (never the SEO function). Preview hosts (`*-git-*.vercel.app` or `VERCEL_ENV=preview`) are `noindex`.
+- If `/robots.txt` returns Vercel **`500 FUNCTION_INVOCATION_FAILED`**, the `/api/public-seo` Node function crashed. Robots/ai paths must stay free of browser-only imports (`brandPortalUrl` / `window`). After a fix, redeploy the web app and re-check `https://{domain}/robots.txt` and `/sitemap.xml`. Google/Bing still need a one-time Search Console / Webmaster sitemap submit of that URL.
 
 ## Franchise center CSV / Excel import
 
