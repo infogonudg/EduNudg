@@ -29,6 +29,25 @@ describe("ManualFranchiseInquiryCard", () => {
     vi.restoreAllMocks();
   });
 
+  it("regression_manual_franchise_requires_phone", () => {
+    const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
+    render(
+      <QueryClientProvider client={qc}>
+        <ManualFranchiseInquiryCard brandId="brand-1" open onClose={vi.fn()} />
+      </QueryClientProvider>
+    );
+
+    const create = screen.getByRole("button", { name: "Create application" });
+    expect(create).toHaveProperty("disabled", true);
+
+    fireEvent.change(screen.getByLabelText("Full name"), { target: { value: "Asha Rao" } });
+    fireEvent.change(screen.getByLabelText("Email"), { target: { value: "asha@example.com" } });
+    expect(create).toHaveProperty("disabled", true);
+
+    fireEvent.change(screen.getByLabelText("Phone"), { target: { value: "9890200000" } });
+    expect(create).toHaveProperty("disabled", false);
+  });
+
   it("regression_manual_franchise_matches_public_apply_fields", async () => {
     const qc = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
     const onClose = vi.fn();

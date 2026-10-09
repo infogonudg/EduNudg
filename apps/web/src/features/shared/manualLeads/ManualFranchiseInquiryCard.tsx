@@ -78,7 +78,7 @@ export function ManualFranchiseInquiryCard({ brandId, open, onClose }: Props) {
     onClose();
   };
 
-  const canSubmit = form.fullName.trim() && form.email.trim();
+  const canSubmit = Boolean(form.fullName.trim() && form.email.trim() && form.phone.trim());
 
   return (
     <dialog

@@ -24,8 +24,8 @@ export function FranchiseSignupSection({ brandSlug }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim() || !email.trim()) {
-      setError("Name and email are required.");
+    if (!fullName.trim() || !email.trim() || !phone.trim()) {
+      setError("Name, email, and phone are required.");
       return;
     }
 
@@ -104,7 +104,11 @@ export function FranchiseSignupSection({ brandSlug }: Props) {
               />
             </label>
             <MutationError message={error} />
-            <Button type="submit" disabled={submitting} block>
+            <Button
+              type="submit"
+              disabled={submitting || !fullName.trim() || !email.trim() || !phone.trim()}
+              block
+            >
               {submitting ? "Submitting…" : "Submit franchise application"}
             </Button>
           </form>

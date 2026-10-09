@@ -14,7 +14,7 @@ Prospective franchise owners apply to open a center under a brand via the brand 
 
 ### Requirement: Public franchise application form
 
-The brand host SHALL expose a franchise application (`#apply`) with extended fields: applicant name, email, phone, proposed franchise name, address, city, state, pincode, and experience.
+The brand host SHALL expose a franchise application (`#apply`) with extended fields: applicant name, email, phone, proposed franchise name, address, city, state, pincode, and experience. **Full name, email, and phone/WhatsApp SHALL be required** on public apply (modal and Novu inline form), staff walk-in create, and `submit_franchise_inquiry_v2` / `create_franchise_inquiry_staff` (empty phone rejected after `normalize_phone_e164`).
 
 On **Abacus Classic** and **Spark Academy** themes, the application SHALL open in a dialog modal (`MarketingLeadModals`). URL hash `#apply` and CTA href `apply` SHALL open the apply modal via `resolveLeadModalKind` / `LeadModalHashOpener`. On Spark Academy the dialog SHALL use Spark chrome (`ac-modal--spark`). Center hosts SHALL NOT expose the franchise apply modal. The apply modal SHALL use the same viewport-capped responsive layout as enroll (mobile full-width; desktop centered two-column fields; scrollable body).
 
@@ -25,6 +25,13 @@ Traceability: FR-B01, FR-B03
 - **WHEN** a visitor submits the franchise application on the brand public homepage
 - **THEN** the system persists the inquiry via `submit_franchise_inquiry_v2` into `franchise_inquiries`
 - **AND** the form is available when the brand is active with domain mapped, without gating on paid subscription
+
+#### Scenario: Phone required on public apply
+
+- **WHEN** a visitor opens Apply for franchise without a WhatsApp/phone value
+- **THEN** submit stays disabled (or shows a required-fields error)
+- **AND** `submit_franchise_inquiry_v2` rejects empty phone (`phone is required`)
+- **AND** brand staff cannot create a walk-in inquiry without phone (`create_franchise_inquiry_staff`)
 
 #### Scenario: Deep link opens apply modal (Abacus/Spark)
 

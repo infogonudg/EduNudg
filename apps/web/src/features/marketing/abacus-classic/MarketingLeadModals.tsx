@@ -189,8 +189,8 @@ function FranchiseForm({ brandSlug, onSuccess }: { brandSlug: string; onSuccess:
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim() || !email.trim()) {
-      setError("Name and email are required.");
+    if (!fullName.trim() || !email.trim() || !phone.trim()) {
+      setError("Name, email, and WhatsApp number are required.");
       return;
     }
     setSubmitting(true);
@@ -229,7 +229,11 @@ function FranchiseForm({ brandSlug, onSuccess }: { brandSlug: string; onSuccess:
         <Input label="City" value={city} onChange={setCity} />
         <Input label="Educational qualification" value={qualification} onChange={setQualification} />
       </div>
-      <Button type="submit" block disabled={submitting || !fullName.trim() || !email.trim()}>
+      <Button
+        type="submit"
+        block
+        disabled={submitting || !fullName.trim() || !email.trim() || !phone.trim()}
+      >
         {submitting ? "Submitting…" : "Apply for franchise"}
       </Button>
     </form>
