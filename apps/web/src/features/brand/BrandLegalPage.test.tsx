@@ -42,8 +42,12 @@ describe("BrandLegalPage", () => {
     expect(document.querySelector("iframe")?.getAttribute("src")).toBe("https://cdn.example/privacy.pdf");
   });
 
-  it("shows unpublished message when document is missing", () => {
+  it("regression_legal_empty_state_hides_admin_upload_instructions", () => {
     renderLegalPage("terms", {});
-    expect(screen.getByText(/not been published yet/i)).toBeDefined();
+    expect(screen.getByRole("heading", { name: "Terms & Conditions" })).toBeDefined();
+    expect(screen.getByText(/not available yet/i)).toBeDefined();
+    expect(screen.queryByText(/Homepage Configuration/i)).toBeNull();
+    expect(screen.queryByText(/Upload it under/i)).toBeNull();
+    expect(screen.getByRole("link", { name: "Back to homepage" })).toBeDefined();
   });
 });

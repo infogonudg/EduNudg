@@ -212,6 +212,31 @@ export function aboutJourneyTrust(
   };
 }
 
+/**
+ * Map a custom About headline onto Spark hero lines so navy + blue highlight
+ * colours still match the homepage (last word becomes `.sa-hero__highlight`).
+ */
+export function aboutHeadlineToHeroLines(headline: string): {
+  line1: string;
+  line1Serif: string;
+  line2: string;
+  line2Serif: string;
+} {
+  const words = headline.split(/\s+/).filter(Boolean);
+  if (words.length === 0) {
+    return { line1: "", line1Serif: "", line2: "", line2Serif: "" };
+  }
+  if (words.length === 1) {
+    return { line1: words[0]!, line1Serif: "", line2: "", line2Serif: "" };
+  }
+  return {
+    line1: words.slice(0, -1).join(" "),
+    line1Serif: words[words.length - 1]!,
+    line2: "",
+    line2Serif: "",
+  };
+}
+
 /** Spark hero on `/about`: About headline/subtitle/CTA on the homepage hero block. */
 export function aboutHeroConfig(
   config: HomepageConfig,
@@ -221,16 +246,20 @@ export function aboutHeroConfig(
   const subtitle = about.heroSubtitle?.trim();
   const ctaLabel = about.onlineCtaLabel?.trim();
   const ctaHref = about.onlineCtaHref?.trim();
+  const stockHeadline = defaultAboutSection(config.meta.siteName || "Our brand").heroHeadline?.trim();
+  // Stock Mastermind seed must not wipe homepage navy/blue title colours.
+  const useHomepageTitle = !headline || headline === stockHeadline;
+  const customLines = headline && !useHomepageTitle ? aboutHeadlineToHeroLines(headline) : null;
 
   return {
     ...config,
     hero: {
       ...config.hero,
       badge: "",
-      line1: headline || config.hero.line1,
-      line1Serif: headline ? "" : config.hero.line1Serif,
-      line2: headline ? "" : config.hero.line2,
-      line2Serif: headline ? "" : config.hero.line2Serif,
+      line1: customLines?.line1 ?? config.hero.line1,
+      line1Serif: customLines?.line1Serif ?? config.hero.line1Serif,
+      line2: customLines ? customLines.line2 : config.hero.line2,
+      line2Serif: customLines ? customLines.line2Serif : config.hero.line2Serif,
       subtitle: subtitle || config.hero.subtitle,
       ctaLabel: ctaLabel || config.hero.ctaLabel,
       ctaHref: ctaHref || config.hero.ctaHref,

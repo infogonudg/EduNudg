@@ -32,7 +32,8 @@ export function SparkAcademyAbout({ config }: Props) {
   const showcase = aboutFeaturesShowcase(about, config.featuresShowcase);
   const journey = aboutJourneyTrust(about, config.trustMedia);
   const aboutTeam = aboutMembersAsFounders(about.members);
-  const team = aboutTeam.length > 0 ? aboutTeam : visiblePublicFounders(config.founders);
+  const usingAboutMembers = aboutTeam.length > 0;
+  const team = usingAboutMembers ? aboutTeam : visiblePublicFounders(config.founders);
   const featureImageFallback =
     about.imageUrl?.trim() ||
     config.featuresShowcase?.imageUrl?.trim() ||
@@ -77,6 +78,7 @@ export function SparkAcademyAbout({ config }: Props) {
           title={about.teamTitle?.trim() || "Meet Our Expert Mentors"}
           subtitle=""
           id="about-team"
+          layout={usingAboutMembers ? "team" : "mentors"}
         />
       ) : null}
     </main>

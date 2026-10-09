@@ -38,11 +38,13 @@ describe("SparkAcademyAbout", () => {
     expect(document.querySelector("#about-journey.sa-journey")).toBeTruthy();
     expect(document.querySelector("#about-team.sa-mentors")).toBeTruthy();
 
-    expect(screen.getByRole("heading", { name: /WE MAKE WINNERS WHO LEAD/i })).toBeDefined();
+    expect(document.querySelector("#about-hero .sa-hero__title")).toBeTruthy();
+    expect(document.querySelector("#about-hero .sa-hero__highlight")).toBeTruthy();
     expect(screen.getByText("We Research")).toBeDefined();
     expect(screen.getByRole("heading", { name: "Our Endeavour" })).toBeDefined();
-    expect(screen.getByRole("heading", { name: "Naveen Chowdhari" })).toBeDefined();
+    expect(screen.getByText("Naveen Chowdhari")).toBeDefined();
     expect(screen.getByText("Director")).toBeDefined();
+    expect(document.querySelector("#about-team.sa-mentors--team")).toBeTruthy();
     expect(document.querySelector(".sa-btn")).toBeTruthy();
 
     expect(document.querySelector(".about-us")).toBeNull();
@@ -107,5 +109,34 @@ describe("SparkAcademyAbout", () => {
     expect(
       document.querySelector("#about-journey img")?.getAttribute("src")
     ).toBe("https://example.com/about-philosophy.jpg");
+  });
+
+  it("regression_spark_about_hero_keeps_homepage_title_colours", () => {
+    const config = mergeSparkAcademyLandingConfig("Spark Brand");
+    renderAbout(config);
+
+    const highlight = document.querySelector("#about-hero .sa-hero__highlight");
+    expect(highlight).toBeTruthy();
+    expect(highlight?.textContent?.trim()).toBe(config.hero.line1Serif?.trim());
+  });
+
+  it("regression_spark_about_team_uses_full_bleed_photo_layout", () => {
+    const config = mergeSparkAcademyLandingConfig("Spark Brand");
+    config.about = {
+      ...config.about!,
+      members: [
+        {
+          id: "1",
+          name: "Our leadership",
+          role: "",
+          photoUrl: "https://example.com/group.jpg",
+        },
+      ],
+    };
+
+    renderAbout(config);
+
+    expect(document.querySelector("#about-team.sa-mentors--team")).toBeTruthy();
+    expect(document.querySelector(".sa-mentors__team-bleed--single")).toBeTruthy();
   });
 });

@@ -35,6 +35,11 @@ AND Features SHALL NOT render Last month / Learning Progress floats
 AND the public homepage `/` still renders those badges on Hero and Features
 AND `landing.about.heroImageUrl` fills the `/about` hero photo when set
 AND `landing.about.philosophyImageUrl` fills the Journey / philosophy highlight photo when set
+AND the hero title keeps homepage navy + blue highlight colours when About still uses the stock Mastermind headline (custom headlines put the last word in `.sa-hero__highlight`)
+AND **Our Team** member photos use a full-bleed band: a single photo spans the viewport; two or more photos use a responsive side-by-side CSS grid (`auto-fill`, wrapping for many uploads) instead of a one-by-one vertical stack or narrow mentor portrait cards
+AND team photos MUST use `object-fit: contain` (not `cover` with a fixed 16:9 aspect ratio) so heads and faces are not cropped
+
+Traceability: regression — `regression_spark_about_hero_keeps_homepage_title_colours`, `regression_about_hero_keeps_homepage_highlight_colours_for_stock_headline`, `regression_about_custom_headline_uses_blue_highlight_on_last_word`, `regression_spark_about_team_uses_full_bleed_photo_layout`, `regression_about_team_photo_spans_full_bleed_width`, `regression_about_single_team_photo_spans_content_width`.
 
 GIVEN an EduLearn brand
 WHEN a visitor opens `/about`

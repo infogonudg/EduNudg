@@ -83,4 +83,33 @@ describe("AboutUsContent", () => {
     expect(container.querySelector(".sa-hero__badge")).toBeNull();
     expect(screen.queryByText("About us")).toBeNull();
   });
+
+  it("regression_about_single_team_photo_spans_content_width", () => {
+    const config = {
+      ...mergeAbacusClassicLandingConfig("Team Brand"),
+      about: {
+        ...mergeAbacusClassicLandingConfig("Team Brand").about!,
+        members: [
+          {
+            id: "1",
+            name: "Leadership team",
+            role: "HQ",
+            photoUrl: "https://example.com/group.jpg",
+          },
+        ],
+      },
+    };
+
+    render(
+      <MemoryRouter>
+        <AboutUsPageContent config={config} />
+      </MemoryRouter>
+    );
+
+    expect(document.querySelector(".about-us__team-banner-photo")).toBeTruthy();
+    expect(
+      screen.getByRole("img", { name: "Leadership team" }).getAttribute("src")
+    ).toBe("https://example.com/group.jpg");
+    expect(document.querySelector(".about-us__team-grid")).toBeNull();
+  });
 });

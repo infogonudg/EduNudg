@@ -30,24 +30,42 @@ function TeamGrid({ section }: { section: HomepageAboutSection }) {
   const members = section.members ?? [];
   if (members.length === 0) return null;
 
+  const bannerPhoto =
+    members.length === 1 && members[0]?.photoUrl?.trim() ? members[0] : null;
+
   return (
     <section className="about-us__team" aria-labelledby="about-team-heading">
       <h2 id="about-team-heading" className="about-us__section-title">
         {section.teamTitle?.trim() || "OUR TEAM"}
       </h2>
-      <ul className="about-us__team-grid">
-        {members.map((member) => (
-          <li key={member.id || member.name} className="about-us__member">
-            {member.photoUrl?.trim() ? (
-              <img src={member.photoUrl} alt={member.name} className="about-us__member-photo" />
-            ) : (
-              <div className="about-us__member-photo about-us__member-photo--placeholder" aria-hidden />
-            )}
-            <h3 className="about-us__member-name">{member.name}</h3>
-            <p className="about-us__member-role">{member.role}</p>
-          </li>
-        ))}
-      </ul>
+      {bannerPhoto ? (
+        <figure className="about-us__team-banner">
+          <img
+            src={bannerPhoto.photoUrl}
+            alt={bannerPhoto.name || "Our team"}
+            className="about-us__team-banner-photo"
+          />
+          {(bannerPhoto.name?.trim() || bannerPhoto.role?.trim()) && (
+            <figcaption className="about-us__team-banner-caption">
+              {[bannerPhoto.name, bannerPhoto.role].filter(Boolean).join(" — ")}
+            </figcaption>
+          )}
+        </figure>
+      ) : (
+        <ul className="about-us__team-grid">
+          {members.map((member) => (
+            <li key={member.id || member.name} className="about-us__member">
+              {member.photoUrl?.trim() ? (
+                <img src={member.photoUrl} alt={member.name} className="about-us__member-photo" />
+              ) : (
+                <div className="about-us__member-photo about-us__member-photo--placeholder" aria-hidden />
+              )}
+              <h3 className="about-us__member-name">{member.name}</h3>
+              <p className="about-us__member-role">{member.role}</p>
+            </li>
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

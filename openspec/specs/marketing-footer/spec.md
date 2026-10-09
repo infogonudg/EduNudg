@@ -18,7 +18,13 @@ AND Word-derived HTML is sanitized with DOMPurify before storage and before `dan
 AND `<script>`, event handlers, and `javascript:` URLs are stripped
 AND the footer includes a link to that route when configured or uploaded
 
-Traceability: regression — `regression_legal_html_strips_script_and_event_handlers`, `regression_legal_page_strips_script_tags_before_inject`.
+GIVEN no document is uploaded for a legal kind
+WHEN a visitor opens `/legal/{kind}`
+THEN the page shows a public-safe “not available yet” message
+AND it MUST NOT mention Homepage Configuration, upload, or other staff-only instructions
+AND it MAY offer a link back to the homepage
+
+Traceability: regression — `regression_legal_html_strips_script_and_event_handlers`, `regression_legal_page_strips_script_tags_before_inject`, `regression_legal_empty_state_hides_admin_upload_instructions`.
 
 ### Brand footer editing
 
