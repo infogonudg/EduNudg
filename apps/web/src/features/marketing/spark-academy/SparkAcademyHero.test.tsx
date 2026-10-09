@@ -111,4 +111,14 @@ describe("buildHeroStats", () => {
     const stats = buildHeroStats(config, 15);
     expect(stats.find((s) => s.label === "Total Courses")?.value).toBe("15+");
   });
+
+  it("regression_total_courses_respects_editor_custom_stats", () => {
+    const config = mergeSparkAcademyLandingConfig("Test");
+    config.footer.rich!.customStats = (config.footer.rich!.customStats ?? []).map((s) =>
+      s.label === "Total Courses" ? { ...s, value: "4k" } : s
+    );
+    const stats = buildHeroStats(config, 1);
+    expect(stats.find((s) => s.label === "Total Courses")?.value).toBe("4k");
+    expect(stats.find((s) => s.label === "Course Category")?.value).toBe("90+");
+  });
 });

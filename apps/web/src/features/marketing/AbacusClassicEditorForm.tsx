@@ -199,6 +199,9 @@ export function AbacusClassicEditorForm({
       >
         <EditorSectionNote>
           Independent of Navigation & CTAs. Empty label or link falls back to the header Primary CTA.
+          {marketingTheme === "spark-academy" || marketingTheme === "edu-learn"
+            ? " Hero stats bar (including Course Category) is edited under Footer & hero stats."
+            : null}
         </EditorSectionNote>
         <EditorFieldsGrid>
           <Input label="Badge" value={config.hero.badge ?? ""} onChange={(v) => onChange({ ...config, hero: { ...config.hero, badge: v } })} />
@@ -739,7 +742,11 @@ export function AbacusClassicEditorForm({
 
       <EditorAccordion
         sectionId="footerRich"
-        title="Footer"
+        title={
+          marketingTheme === "spark-academy" || marketingTheme === "edu-learn"
+            ? "Footer & hero stats"
+            : "Footer"
+        }
         enabled={isThemeSectionEnabled("footerRich")}
         onEnabledChange={(e) => setSection("footerRich", e)}
       >
@@ -821,6 +828,11 @@ export function AbacusClassicEditorForm({
             onChange={(v) => onChange({ ...config, footer: { ...config.footer, copyright: v } })}
           />
         </EditorFieldsGrid>
+        <EditorSectionNote>
+          {marketingTheme === "spark-academy" || marketingTheme === "edu-learn"
+            ? "Hero stats bar on the homepage (Satisfaction rate, Years of experience, Total Courses, Course Category). Edit values here — including Total Courses and Course Category — then Save. There is no separate Hero control for these."
+            : "Optional custom stats shown in theme chrome where supported."}
+        </EditorSectionNote>
         <EditorItemList
           onAdd={() =>
             onChange({
@@ -831,12 +843,12 @@ export function AbacusClassicEditorForm({
               },
             })
           }
-          addLabel="+ Add custom stat"
+          addLabel="+ Add hero / custom stat"
         >
           {(rich.customStats ?? []).map((stat, i) => (
             <EditorItemPanel
               key={`stat-${i}`}
-              title={`Custom stat ${i + 1}`}
+              title={stat.label.trim() || `Stat ${i + 1}`}
               onRemove={() =>
                 onChange({
                   ...config,
