@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { LeadModalProvider } from "@/features/marketing/abacus-classic/LeadModalContext";
 import { MarketingLeadModals } from "@/features/marketing/abacus-classic/MarketingLeadModals";
 import { exactAccessibleName } from "@/test/exactAccessibleName";
@@ -43,6 +43,30 @@ describe("Spark Academy lead modals", () => {
     expect(apply?.classList.contains("ac-modal--spark")).toBe(true);
     expect(apply?.open).toBe(true);
     expect(screen.getByLabelText("Full name")).toBeDefined();
+  });
+
+  it("regression_franchise_apply_requires_whatsapp_phone", () => {
+    render(
+      <LeadModalProvider>
+        <SparkAcademyCta label="Apply now" href="apply" variant="outline" />
+        <MarketingLeadModals brandSlug="smart-brain-abacus" theme="spark-academy" />
+      </LeadModalProvider>
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: exactAccessibleName("Apply now") }));
+    const applyDialog = screen.getByRole("heading", { level: 2, name: "Apply for franchise" }).closest(
+      "dialog"
+    ) as HTMLElement;
+    const apply = within(applyDialog);
+    const submit = apply.getByRole("button", { name: exactAccessibleName("Apply for franchise") });
+    expect(submit).toHaveProperty("disabled", true);
+
+    fireEvent.change(apply.getByLabelText("Full name"), { target: { value: "Priya K" } });
+    fireEvent.change(apply.getByLabelText("Email"), { target: { value: "priya@example.com" } });
+    expect(submit).toHaveProperty("disabled", true);
+
+    fireEvent.change(apply.getByLabelText("WhatsApp number"), { target: { value: "9890200000" } });
+    expect(submit).toHaveProperty("disabled", false);
   });
 
   it("regression_spark_lead_modal_css_matches_theme_tokens", () => {

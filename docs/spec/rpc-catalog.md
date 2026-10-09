@@ -9,7 +9,7 @@ All functions `SECURITY DEFINER`, `SET search_path = public`, validate tenant fr
 | `submit_platform_brand_signup(...)` | Platform | Insert `platform_brand_signups` pending |
 | `get_brand_landing_public(p_brand_slug)` | Brand | Landing JSON + published success stories; **no** subscription gate on forms |
 | `get_brand_success_stories_public(p_brand_slug)` | Brand | *(deprecated — use landing payload `success_stories`)* |
-| `submit_franchise_inquiry_v2(...)` | Brand | Insert `franchise_inquiries` |
+| `submit_franchise_inquiry_v2(...)` | Brand | Insert `franchise_inquiries` (name, email, phone required) |
 | `submit_brand_student_application(...)` | Brand | `upsert_lead_by_whatsapp`, `lead_source = brand` |
 | `get_portal_branding(p_brand_slug, p_center_slug)` | Brand / center / learn | Login + staff chrome; logo prefers `landing.meta.logoUrl` (Site logo) then `brands.logo_url`; `center_name` prefers `franchise_centers.display_name` (migration `091`) |
 | `resolve_hostname_tenant(p_hostname)` | Any (custom domain) | Hostname → `portal_type` + `brand_id`/`brand_slug` (+ center when mapped). Required for purchased domains: anon cannot `SELECT brands.slug` under RLS (`108`) |

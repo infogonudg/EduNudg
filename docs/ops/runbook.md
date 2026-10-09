@@ -94,7 +94,14 @@ Do not use local `vercel build` + `vercel deploy --prebuilt` for this Vite SPA w
 | `VERCEL_ORG_ID` | Vercel team id (`team_…`) — MCP `list_teams`, or `.vercel/project.json` → `orgId` |
 | `VERCEL_PROJECT_ID` | Project id (`prj_…`) — MCP `list_projects` / `get_project`, or `.vercel/project.json` → `projectId` |
 
-Current production project (team **chetanbhansali-3860's projects**): project **edunudg-hub** → `https://edunudg-hub.vercel.app`.
+Current production project: **edu-nudg** (`prj_os2scE3UWh38dUTij2f2NT2vz63G`) → production URL `https://edunudg-hub.vercel.app` (hostname can differ from the Vercel project name).
+
+**One GitHub repo → one Vercel project.** If a PR shows two checks (**Vercel – edu-nudg** and **Vercel – edu-nudg-web**) and **-web** opens **Not Found**, orphan project **edu-nudg-web** is still linked to GitHub. That is not a code bug; the repo cannot remove that check.
+
+1. Open [Vercel Dashboard](https://vercel.com/dashboard) → your team.
+2. Open **edu-nudg-web** → **Settings → Git → Disconnect** (or **Delete Project** if unused).
+3. Keep **edu-nudg** only (Root Directory `apps/web`; domains like `edunudg-hub.vercel.app` / brand custom domains stay on this project). Confirm Actions secret `VERCEL_PROJECT_ID` matches `prj_os2scE3UWh38dUTij2f2NT2vz63G`.
+4. Refresh the PR — the **-web** check should disappear. A green check that 404s is noise; it does not break production.
 
 ```bash
 # Prefer pnpm dlx if `vercel` is not on PATH (no global install required)

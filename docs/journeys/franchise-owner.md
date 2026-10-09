@@ -20,7 +20,7 @@ flowchart LR
 ## Steps
 
 1. Visitor opens `http://{brand}.localhost:9000/` → **Franchise application** (`#apply`; Abacus/Spark open the apply modal via `LeadModalHashOpener`).
-2. Submit → `submit_franchise_inquiry_v2` → `franchise_inquiries`.
+2. Submit (name, email, and phone/WhatsApp required) → `submit_franchise_inquiry_v2` → `franchise_inquiries`.
 3. Brand owner opens **Franchise Applications** (`/app/franchise-applications`).
 4. **Approve** → single RPC transaction:
    - `franchise_centers` row (slug from proposed name)

@@ -151,7 +151,7 @@ export function FranchiseInquiryDetailCard({
   const setField = (key: keyof UpdateFranchiseInquiryInput) => (value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
-  const canSave = form.fullName.trim() && form.email.trim();
+  const canSave = Boolean(form.fullName.trim() && form.email.trim() && form.phoneE164.trim());
   const showPendingActions = pending && !rejectMode;
   const actionButtons =
     showPendingActions && editing ? (
