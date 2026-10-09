@@ -65,6 +65,9 @@ describe("Spark Academy lead modals", () => {
     fireEvent.change(apply.getByLabelText("Email"), { target: { value: "priya@example.com" } });
     expect(submit).toHaveProperty("disabled", true);
 
+    fireEvent.change(apply.getByLabelText("WhatsApp number"), { target: { value: "1234abc" } });
+    expect(submit).toHaveProperty("disabled", true);
+
     fireEvent.change(apply.getByLabelText("WhatsApp number"), { target: { value: "9890200000" } });
     expect(submit).toHaveProperty("disabled", false);
   });

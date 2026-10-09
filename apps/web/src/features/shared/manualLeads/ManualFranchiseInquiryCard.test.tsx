@@ -44,6 +44,9 @@ describe("ManualFranchiseInquiryCard", () => {
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: "asha@example.com" } });
     expect(create).toHaveProperty("disabled", true);
 
+    fireEvent.change(screen.getByLabelText("Phone"), { target: { value: "1234abc" } });
+    expect(create).toHaveProperty("disabled", true);
+
     fireEvent.change(screen.getByLabelText("Phone"), { target: { value: "9890200000" } });
     expect(create).toHaveProperty("disabled", false);
   });

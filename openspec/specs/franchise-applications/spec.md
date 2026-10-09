@@ -14,7 +14,7 @@ Prospective franchise owners apply to open a center under a brand via the brand 
 
 ### Requirement: Public franchise application form
 
-The brand host SHALL expose a franchise application (`#apply`) with extended fields: applicant name, email, phone, proposed franchise name, address, city, state, pincode, and experience. **Full name, email, and phone/WhatsApp SHALL be required** on public apply (modal and Novu inline form), staff walk-in create, and `submit_franchise_inquiry_v2` / `create_franchise_inquiry_staff` (empty phone rejected after `normalize_phone_e164`).
+The brand host SHALL expose a franchise application (`#apply`) with extended fields: applicant name, email, phone, proposed franchise name, address, city, state, pincode, and experience. **Full name, email, and phone/WhatsApp SHALL be required** on public apply (modal and Novu inline form), staff walk-in create, and `submit_franchise_inquiry_v2` / `create_franchise_inquiry_staff`. Phone SHALL be a valid India mobile (`isValidIndiaMobileInput` / `is_valid_india_mobile`: 10 digits starting 6–9, optional `0` / `91` / `+91`; letters and short junk like `1234abc` rejected).
 
 On **Abacus Classic** and **Spark Academy** themes, the application SHALL open in a dialog modal (`MarketingLeadModals`). URL hash `#apply` and CTA href `apply` SHALL open the apply modal via `resolveLeadModalKind` / `LeadModalHashOpener`. On Spark Academy the dialog SHALL use Spark chrome (`ac-modal--spark`). Center hosts SHALL NOT expose the franchise apply modal. The apply modal SHALL use the same viewport-capped responsive layout as enroll (mobile full-width; desktop centered two-column fields; scrollable body).
 
@@ -32,6 +32,12 @@ Traceability: FR-B01, FR-B03
 - **THEN** submit stays disabled (or shows a required-fields error)
 - **AND** `submit_franchise_inquiry_v2` rejects empty phone (`phone is required`)
 - **AND** brand staff cannot create a walk-in inquiry without phone (`create_franchise_inquiry_staff`)
+
+#### Scenario: Phone format validated on public apply
+
+- **WHEN** a visitor enters an invalid mobile such as `1234abc` or a 10-digit number not starting with 6–9
+- **THEN** Apply for franchise stays disabled (or shows an invalid-phone error)
+- **AND** `submit_franchise_inquiry_v2` / `create_franchise_inquiry_staff` raise `phone is invalid`
 
 #### Scenario: Deep link opens apply modal (Abacus/Spark)
 

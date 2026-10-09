@@ -30,8 +30,27 @@ BEGIN
   EXCEPTION
     WHEN others THEN
       v_err := SQLERRM;
-      IF v_err NOT ILIKE '%phone is required%' AND v_err NOT ILIKE '%feature_disabled%' THEN
+      IF v_err NOT ILIKE '%phone is required%'
+         AND v_err NOT ILIKE '%phone is invalid%'
+         AND v_err NOT ILIKE '%feature_disabled%' THEN
         RAISE EXCEPTION 'unexpected submit empty phone error: %', v_err;
+      END IF;
+  END;
+
+  BEGIN
+    PERFORM public.submit_franchise_inquiry_v2(
+      v_brand_slug,
+      'Bad Phone Applicant',
+      'badphone@example.com',
+      '1234abc',
+      'Pune'
+    );
+    RAISE EXCEPTION 'submit_franchise_inquiry_v2 must reject 1234abc';
+  EXCEPTION
+    WHEN others THEN
+      v_err := SQLERRM;
+      IF v_err NOT ILIKE '%phone is invalid%' AND v_err NOT ILIKE '%feature_disabled%' THEN
+        RAISE EXCEPTION 'unexpected submit bad phone error: %', v_err;
       END IF;
   END;
 
@@ -47,7 +66,9 @@ BEGIN
   EXCEPTION
     WHEN others THEN
       v_err := SQLERRM;
-      IF v_err NOT ILIKE '%phone is required%' AND v_err NOT ILIKE '%Not authorized%' THEN
+      IF v_err NOT ILIKE '%phone is required%'
+         AND v_err NOT ILIKE '%phone is invalid%'
+         AND v_err NOT ILIKE '%Not authorized%' THEN
         RAISE EXCEPTION 'unexpected staff empty phone error: %', v_err;
       END IF;
   END;

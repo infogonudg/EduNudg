@@ -3,6 +3,7 @@ import { Button, Input, MutationError } from "@edunudg/ui";
 import { submitFranchiseInquiry } from "@/lib/brandLandingApi";
 import { submitBrandStudentApplication, submitCenterStudentRegistration } from "@/lib/leadsApi";
 import { isIndiaPincode } from "@/lib/leadSla";
+import { INDIA_MOBILE_INVALID_MESSAGE, isValidIndiaMobileInput } from "@/lib/phoneInput";
 import type { MarketingTheme } from "@/types/homepage";
 import { useLeadModal, type LeadModalKind } from "./LeadModalContext";
 import { resolveLeadModalKind } from "./resolveLeadModalKind";
@@ -187,10 +188,16 @@ function FranchiseForm({ brandSlug, onSuccess }: { brandSlug: string; onSuccess:
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
+  const phoneValid = isValidIndiaMobileInput(phone);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName.trim() || !email.trim() || !phone.trim()) {
       setError("Name, email, and WhatsApp number are required.");
+      return;
+    }
+    if (!phoneValid) {
+      setError(INDIA_MOBILE_INVALID_MESSAGE);
       return;
     }
     setSubmitting(true);
@@ -232,7 +239,7 @@ function FranchiseForm({ brandSlug, onSuccess }: { brandSlug: string; onSuccess:
       <Button
         type="submit"
         block
-        disabled={submitting || !fullName.trim() || !email.trim() || !phone.trim()}
+        disabled={submitting || !fullName.trim() || !email.trim() || !phoneValid}
       >
         {submitting ? "Submitting…" : "Apply for franchise"}
       </Button>

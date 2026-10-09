@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, Input, MutationError } from "@edunudg/ui";
 import { submitFranchiseInquiry } from "@/lib/brandLandingApi";
+import { INDIA_MOBILE_INVALID_MESSAGE, isValidIndiaMobileInput } from "@/lib/phoneInput";
 import { EnquiryPromoSection } from "./EnquiryPromoSection";
 
 type Props = {
@@ -26,6 +27,10 @@ export function FranchiseSignupSection({ brandSlug }: Props) {
     e.preventDefault();
     if (!fullName.trim() || !email.trim() || !phone.trim()) {
       setError("Name, email, and phone are required.");
+      return;
+    }
+    if (!isValidIndiaMobileInput(phone)) {
+      setError(INDIA_MOBILE_INVALID_MESSAGE);
       return;
     }
 
@@ -106,7 +111,12 @@ export function FranchiseSignupSection({ brandSlug }: Props) {
             <MutationError message={error} />
             <Button
               type="submit"
-              disabled={submitting || !fullName.trim() || !email.trim() || !phone.trim()}
+              disabled={
+                submitting ||
+                !fullName.trim() ||
+                !email.trim() ||
+                !isValidIndiaMobileInput(phone)
+              }
               block
             >
               {submitting ? "Submitting…" : "Submit franchise application"}
