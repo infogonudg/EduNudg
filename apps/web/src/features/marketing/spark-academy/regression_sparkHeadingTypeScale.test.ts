@@ -40,8 +40,10 @@ describe("Spark Academy course page canvas", () => {
   });
 
   it("regression_spark_course_card_photo_css_shows_full_banner", () => {
+    // Shared 16:9 frame; contain keeps the full banner (not a cropped cover).
+    expect(css).toMatch(/\.sa-course-card__media\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*9/s);
     expect(css).toMatch(/\.sa-course-card__photo\s*\{[^}]*object-fit:\s*contain/s);
-    expect(css).toMatch(/\.sa-course-card__photo\s*\{[^}]*height:\s*auto/s);
-    expect(css).toMatch(/\.sa-course-card__media--image\s*\{[^}]*height:\s*auto/s);
+    expect(css).toMatch(/\.sa-course-card__photo\s*\{[^}]*height:\s*100%/s);
+    expect(css).not.toMatch(/\.sa-course-card__media--image\s*\{[^}]*height:\s*auto/s);
   });
 });

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Input, ToggleField } from "@edunudg/ui";
+import { Input, Textarea, ToggleField } from "@edunudg/ui";
 import type {
   HomepageConfig,
   HomepageFaq,
@@ -109,6 +109,10 @@ export function AbacusClassicEditorForm({
       </p>
 
       <EditorAccordion sectionId="site" title="Site">
+        <EditorSectionNote>
+          Site name and logo appear in the public header and in the footer left column. The blurb below
+          shows under the footer logo and name.
+        </EditorSectionNote>
         <EditorFieldsGrid>
           <Input
             label="Site name"
@@ -126,6 +130,22 @@ export function AbacusClassicEditorForm({
               layout="logo"
               required
             />
+          </EditorFieldSpan>
+          <EditorFieldSpan>
+            <div className="ed-homepage-editor-site-blurb">
+              <Textarea
+                label="Footer blurb under logo"
+                value={rich.description ?? ""}
+                onChange={(v) =>
+                  onChange({
+                    ...config,
+                    footer: { ...config.footer, rich: { ...rich, description: v } },
+                  })
+                }
+                rows={3}
+                placeholder="Short description of your brand under the footer logo"
+              />
+            </div>
           </EditorFieldSpan>
         </EditorFieldsGrid>
       </EditorAccordion>
@@ -200,7 +220,7 @@ export function AbacusClassicEditorForm({
         <EditorSectionNote>
           Independent of Navigation & CTAs. Empty label or link falls back to the header Primary CTA.
           {marketingTheme === "spark-academy" || marketingTheme === "edu-learn"
-            ? " Hero stats bar (including Course Category) is edited under Footer & hero stats."
+            ? " Hero stats bar (including Course Category) is edited under Footer → Hero stats bar."
             : null}
         </EditorSectionNote>
         <EditorFieldsGrid>
@@ -742,22 +762,15 @@ export function AbacusClassicEditorForm({
 
       <EditorAccordion
         sectionId="footerRich"
-        title={
-          marketingTheme === "spark-academy" || marketingTheme === "edu-learn"
-            ? "Footer & hero stats"
-            : "Footer"
-        }
+        title="Footer"
         enabled={isThemeSectionEnabled("footerRich")}
         onEnabledChange={(e) => setSection("footerRich", e)}
       >
+        <EditorSectionNote>
+          Contact, presence, and copyright. Footer logo blurb is edited under <strong>Site</strong> →{" "}
+          <strong>Footer blurb under logo</strong>.
+        </EditorSectionNote>
         <EditorFieldsGrid>
-          <EditorFieldSpan>
-            <Input
-              label="Brand description"
-              value={rich.description ?? ""}
-              onChange={(v) => onChange({ ...config, footer: { ...config.footer, rich: { ...rich, description: v } } })}
-            />
-          </EditorFieldSpan>
           <FooterRichEditorFields config={config} onChange={onChange} />
           <Input
             label="Head office address"
@@ -828,61 +841,141 @@ export function AbacusClassicEditorForm({
             onChange={(v) => onChange({ ...config, footer: { ...config.footer, copyright: v } })}
           />
         </EditorFieldsGrid>
-        <EditorSectionNote>
-          {marketingTheme === "spark-academy" || marketingTheme === "edu-learn"
-            ? "Hero stats bar on the homepage (Satisfaction rate, Years of experience, Total Courses, Course Category). Edit values here — including Total Courses and Course Category — then Save. There is no separate Hero control for these."
-            : "Optional custom stats shown in theme chrome where supported."}
-        </EditorSectionNote>
-        <EditorItemList
-          onAdd={() =>
-            onChange({
-              ...config,
-              footer: {
-                ...config.footer,
-                rich: { ...rich, customStats: [...(rich.customStats ?? []), { value: "12+", label: "Years" }] },
-              },
-            })
-          }
-          addLabel="+ Add hero / custom stat"
-        >
-          {(rich.customStats ?? []).map((stat, i) => (
-            <EditorItemPanel
-              key={`stat-${i}`}
-              title={stat.label.trim() || `Stat ${i + 1}`}
-              onRemove={() =>
+        {marketingTheme === "spark-academy" || marketingTheme === "edu-learn" ? (
+          <EditorGroupedPanel
+            title="Hero stats bar"
+            note="Shown on the homepage hero (Satisfaction rate, Years, Total Courses, Course Category). Not part of the footer column."
+          >
+            <EditorItemList
+              onAdd={() =>
                 onChange({
                   ...config,
                   footer: {
                     ...config.footer,
-                    rich: { ...rich, customStats: (rich.customStats ?? []).filter((_, idx) => idx !== i) },
+                    rich: {
+                      ...rich,
+                      customStats: [...(rich.customStats ?? []), { value: "12+", label: "Years" }],
+                    },
                   },
                 })
               }
-              removeLabel="Remove stat"
+              addLabel="+ Add hero stat"
             >
-              <EditorFieldsGrid>
-                <Input
-                  label="Stat value"
-                  value={stat.value}
-                  onChange={(v) => {
-                    const customStats = [...(rich.customStats ?? [])];
-                    customStats[i] = { ...stat, value: v };
-                    onChange({ ...config, footer: { ...config.footer, rich: { ...rich, customStats } } });
-                  }}
-                />
-                <Input
-                  label="Stat label"
-                  value={stat.label}
-                  onChange={(v) => {
-                    const customStats = [...(rich.customStats ?? [])];
-                    customStats[i] = { ...stat, label: v };
-                    onChange({ ...config, footer: { ...config.footer, rich: { ...rich, customStats } } });
-                  }}
-                />
-              </EditorFieldsGrid>
-            </EditorItemPanel>
-          ))}
-        </EditorItemList>
+              {(rich.customStats ?? []).map((stat, i) => (
+                <EditorItemPanel
+                  key={`stat-${i}`}
+                  title={stat.label.trim() || `Stat ${i + 1}`}
+                  onRemove={() =>
+                    onChange({
+                      ...config,
+                      footer: {
+                        ...config.footer,
+                        rich: {
+                          ...rich,
+                          customStats: (rich.customStats ?? []).filter((_, idx) => idx !== i),
+                        },
+                      },
+                    })
+                  }
+                  removeLabel="Remove stat"
+                >
+                  <EditorFieldsGrid>
+                    <Input
+                      label="Stat value"
+                      value={stat.value}
+                      onChange={(v) => {
+                        const customStats = [...(rich.customStats ?? [])];
+                        customStats[i] = { ...stat, value: v };
+                        onChange({
+                          ...config,
+                          footer: { ...config.footer, rich: { ...rich, customStats } },
+                        });
+                      }}
+                    />
+                    <Input
+                      label="Stat label"
+                      value={stat.label}
+                      onChange={(v) => {
+                        const customStats = [...(rich.customStats ?? [])];
+                        customStats[i] = { ...stat, label: v };
+                        onChange({
+                          ...config,
+                          footer: { ...config.footer, rich: { ...rich, customStats } },
+                        });
+                      }}
+                    />
+                  </EditorFieldsGrid>
+                </EditorItemPanel>
+              ))}
+            </EditorItemList>
+          </EditorGroupedPanel>
+        ) : (
+          <>
+            <EditorSectionNote>Optional custom stats shown in theme chrome where supported.</EditorSectionNote>
+            <EditorItemList
+              onAdd={() =>
+                onChange({
+                  ...config,
+                  footer: {
+                    ...config.footer,
+                    rich: {
+                      ...rich,
+                      customStats: [...(rich.customStats ?? []), { value: "12+", label: "Years" }],
+                    },
+                  },
+                })
+              }
+              addLabel="+ Add custom stat"
+            >
+              {(rich.customStats ?? []).map((stat, i) => (
+                <EditorItemPanel
+                  key={`stat-${i}`}
+                  title={stat.label.trim() || `Stat ${i + 1}`}
+                  onRemove={() =>
+                    onChange({
+                      ...config,
+                      footer: {
+                        ...config.footer,
+                        rich: {
+                          ...rich,
+                          customStats: (rich.customStats ?? []).filter((_, idx) => idx !== i),
+                        },
+                      },
+                    })
+                  }
+                  removeLabel="Remove stat"
+                >
+                  <EditorFieldsGrid>
+                    <Input
+                      label="Stat value"
+                      value={stat.value}
+                      onChange={(v) => {
+                        const customStats = [...(rich.customStats ?? [])];
+                        customStats[i] = { ...stat, value: v };
+                        onChange({
+                          ...config,
+                          footer: { ...config.footer, rich: { ...rich, customStats } },
+                        });
+                      }}
+                    />
+                    <Input
+                      label="Stat label"
+                      value={stat.label}
+                      onChange={(v) => {
+                        const customStats = [...(rich.customStats ?? [])];
+                        customStats[i] = { ...stat, label: v };
+                        onChange({
+                          ...config,
+                          footer: { ...config.footer, rich: { ...rich, customStats } },
+                        });
+                      }}
+                    />
+                  </EditorFieldsGrid>
+                </EditorItemPanel>
+              ))}
+            </EditorItemList>
+          </>
+        )}
       </EditorAccordion>
 
       {portalMode === "brand" && onLegalPagesChange ? (
