@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button, FormGrid, Input, MutationError, Textarea } from "@edunudg/ui";
 import { createFranchiseInquiryStaff } from "@/lib/manualLeadsApi";
-import { PHONE_INPUT_PLACEHOLDER } from "@/lib/phoneInput";
+import { isValidIndiaMobileInput, PHONE_INPUT_PLACEHOLDER } from "@/lib/phoneInput";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
 import "@/features/platform/brandDetailPage.css";
 import "@/features/brand/franchiseApplications/franchiseApplications.css";
@@ -78,7 +78,9 @@ export function ManualFranchiseInquiryCard({ brandId, open, onClose }: Props) {
     onClose();
   };
 
-  const canSubmit = Boolean(form.fullName.trim() && form.email.trim() && form.phone.trim());
+  const canSubmit = Boolean(
+    form.fullName.trim() && form.email.trim() && isValidIndiaMobileInput(form.phone)
+  );
 
   return (
     <dialog

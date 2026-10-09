@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, FormGrid, Input, PipelineDetailPanel, Textarea } from "@edunudg/ui";
 import { PhoneLink } from "@edunudg/ui";
-import { PHONE_INPUT_PLACEHOLDER } from "@/lib/phoneInput";
+import { isValidIndiaMobileInput, PHONE_INPUT_PLACEHOLDER } from "@/lib/phoneInput";
 import type { UpdateFranchiseInquiryInput } from "@/lib/franchiseInquiriesApi";
 import { mapsEmbedUrl, mapsSearchUrl } from "./franchiseApplicationsHelpers";
 
@@ -151,7 +151,9 @@ export function FranchiseInquiryDetailCard({
   const setField = (key: keyof UpdateFranchiseInquiryInput) => (value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
-  const canSave = Boolean(form.fullName.trim() && form.email.trim() && form.phoneE164.trim());
+  const canSave = Boolean(
+    form.fullName.trim() && form.email.trim() && isValidIndiaMobileInput(form.phoneE164)
+  );
   const showPendingActions = pending && !rejectMode;
   const actionButtons =
     showPendingActions && editing ? (
