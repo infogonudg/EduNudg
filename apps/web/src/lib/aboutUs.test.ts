@@ -85,10 +85,32 @@ describe("aboutUs", () => {
     const about = defaultAboutSection("Spark Brand");
     const hero = aboutHeroConfig(config, about).hero;
     expect(hero.badge).toBe("");
-    expect(hero.line1).toBe("WE MAKE WINNERS WHO LEAD");
-    expect(hero.line1Serif).toBe("");
+    // Stock Mastermind headline keeps homepage navy + blue title colours.
+    expect(hero.line1).toBe(config.hero.line1);
+    expect(hero.line1Serif).toBe(config.hero.line1Serif);
+    expect(hero.line2).toBe(config.hero.line2);
     expect(hero.subtitle).toContain("brain development");
     expect(hero.ctaLabel).toBe("Book a free demo");
+  });
+
+  it("regression_about_hero_keeps_homepage_highlight_colours_for_stock_headline", () => {
+    const config = mergeSparkAcademyLandingConfig("Spark Brand");
+    const about = defaultAboutSection("Spark Brand");
+    const hero = aboutHeroConfig(config, about).hero;
+    expect(hero.line1Serif?.trim()).toBeTruthy();
+    expect(hero.line1Serif).toBe(config.hero.line1Serif);
+  });
+
+  it("regression_about_custom_headline_uses_blue_highlight_on_last_word", () => {
+    const config = mergeSparkAcademyLandingConfig("Spark Brand");
+    const about = {
+      ...defaultAboutSection("Spark Brand"),
+      heroHeadline: "We build confident learners",
+    };
+    const hero = aboutHeroConfig(config, about).hero;
+    expect(hero.line1).toBe("We build confident");
+    expect(hero.line1Serif).toBe("learners");
+    expect(hero.line2).toBe("");
   });
 
   it("aboutHeroConfig_uses_about_hero_image_when_uploaded", () => {

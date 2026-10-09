@@ -73,6 +73,73 @@ describe("MentorsSection", () => {
 
     expect(screen.getAllByText("Director")).toHaveLength(1);
   });
+
+  it("regression_about_team_photo_spans_full_bleed_width", () => {
+    render(
+      <MentorsSection
+        layout="team"
+        eyebrow="Our Team"
+        title="OUR TEAM"
+        subtitle=""
+        id="about-team"
+        founders={[
+          {
+            roleBadge: "",
+            name: "Leadership team",
+            title: "",
+            bio: "",
+            photoUrl: "https://example.com/team-group.jpg",
+          },
+        ]}
+      />
+    );
+
+    expect(document.querySelector(".sa-mentors--team")).toBeTruthy();
+    expect(document.querySelector(".sa-mentors__team-bleed--single")).toBeTruthy();
+    expect(document.querySelector(".sa-mentors__track")).toBeNull();
+    expect(
+      document.querySelector(".sa-mentors__team-media img")?.getAttribute("src")
+    ).toBe("https://example.com/team-group.jpg");
+  });
+
+  it("regression_about_team_photos_do_not_crop_heads_with_cover", () => {
+    const css = readFileSync(resolve(__dirname, "spark-academy.css"), "utf8");
+    const gridImg = css.match(
+      /\.sa-mentors--team \.sa-mentors__team-bleed--grid \.sa-mentors__team-media img[\s\S]*?\{[\s\S]*?\}/
+    )?.[0];
+    expect(gridImg).toBeTruthy();
+    expect(gridImg).toMatch(/object-fit:\s*contain/);
+    expect(gridImg).not.toMatch(/object-fit:\s*cover/);
+    expect(css).toMatch(
+      /\.sa-mentors--team \.sa-mentors__team-bleed--grid\s*\{[^}]*grid-template-columns:\s*repeat\(auto-fill/s
+    );
+    expect(css).not.toMatch(
+      /\.sa-mentors--team[\s\S]*?aspect-ratio:\s*16\s*\/\s*9/
+    );
+  });
+
+  it("regression_about_team_multiple_photos_render_side_by_side_grid", () => {
+    render(
+      <MentorsSection
+        layout="team"
+        eyebrow="Our Team"
+        title="OUR TEAM"
+        subtitle=""
+        id="about-team"
+        founders={Array.from({ length: 10 }, (_, i) => ({
+          roleBadge: "",
+          name: `Member ${i + 1}`,
+          title: "",
+          bio: "",
+          photoUrl: `https://example.com/team-${i + 1}.jpg`,
+        }))}
+      />
+    );
+
+    expect(document.querySelector(".sa-mentors__team-bleed--grid")).toBeTruthy();
+    expect(document.querySelector(".sa-mentors__team-bleed--single")).toBeNull();
+    expect(document.querySelectorAll(".sa-mentors__team-figure")).toHaveLength(10);
+  });
 });
 
 describe("TestimonialsSection", () => {

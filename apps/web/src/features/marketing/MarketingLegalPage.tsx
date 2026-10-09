@@ -26,9 +26,7 @@ export function MarketingLegalPage() {
       <div className="marketing-legal-page">
         <div className="marketing-legal-page__inner">
           <h1>{BRAND_LEGAL_PAGE_LABELS[kind]}</h1>
-          <p>
-            This document has not been published yet. Upload it under Homepage Configuration, then save.
-          </p>
+          <p>This policy is not available yet. Please check back later or contact us if you need a copy.</p>
           <Link to="/">Back to homepage</Link>
         </div>
       </div>

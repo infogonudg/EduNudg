@@ -1229,6 +1229,87 @@ body:has(.marketing-page--spark-academy .sa-course-detail) {
   object-position: center top;
 }
 
+/*
+ * About `/about` Our Team:
+ * - 1 photo → full-bleed wide (group shot)
+ * - 2+ photos → responsive side-by-side grid (wraps for ~10 photos)
+ * Always object-fit: contain so heads are not cropped (unlike cover + 16/9).
+ */
+.sa-mentors--team .sa-mentors__team-bleed {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  box-sizing: border-box;
+}
+
+.sa-mentors--team .sa-mentors__team-media {
+  width: 100%;
+  background: #f1f5f9;
+}
+
+.sa-mentors--team .sa-mentors__team-bleed--single .sa-mentors__team-media img,
+.sa-mentors--team .sa-mentors__team-bleed--single .sa-mentors__team-media video {
+  width: 100%;
+  height: auto;
+  max-height: min(80vh, 720px);
+  object-fit: contain;
+  object-position: center top;
+  display: block;
+}
+
+.sa-mentors--team .sa-mentors__team-bleed--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  gap: 1.25rem 1rem;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
+}
+
+.sa-mentors--team .sa-mentors__team-bleed--grid .sa-mentors__team-media {
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+.sa-mentors--team .sa-mentors__team-bleed--grid .sa-mentors__team-media img,
+.sa-mentors--team .sa-mentors__team-bleed--grid .sa-mentors__team-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center top;
+  display: block;
+}
+
+.sa-mentors--team .sa-mentors__team-figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sa-mentors--team .sa-mentors__team-caption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+  padding: 0 1.25rem;
+}
+
+.sa-mentors--team .sa-mentors__team-name {
+  font-family: var(--sa-heading-font);
+  font-size: var(--sa-h3-size);
+  font-weight: var(--sa-h3-weight);
+  color: var(--sa-navy);
+}
+
+.sa-mentors--team .sa-mentors__team-role {
+  color: #6b7280;
+  font-size: 0.9375rem;
+}
+
 .sa-mentor-card__initial {
   display: grid;
   place-items: center;
