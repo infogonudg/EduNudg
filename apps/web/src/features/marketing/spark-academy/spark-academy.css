@@ -638,22 +638,24 @@ body:has(.marketing-page--spark-academy .sa-course-detail) {
 
 .sa-course-card__media {
   position: relative;
-  height: 160px;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  min-height: 0;
   display: grid;
   place-items: center;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  overflow: hidden;
 }
 
 .sa-course-card__media--image {
-  height: auto;
   background: #f1f5f9;
 }
 
 .sa-course-card__photo {
   width: 100%;
-  height: auto;
+  height: 100%;
   display: block;
   object-fit: contain;
   object-position: center;

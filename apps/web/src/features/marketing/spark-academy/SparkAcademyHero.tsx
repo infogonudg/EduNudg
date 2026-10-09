@@ -58,6 +58,8 @@ function buildHeroStats(
     break;
   }
 
+  // Editor customStats win. Live curriculum count only fills Total Courses when that
+  // label was not configured (fallback path above).
   return stats.slice(0, 4);
 }
 

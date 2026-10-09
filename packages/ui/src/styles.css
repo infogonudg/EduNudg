@@ -5012,6 +5012,16 @@
   }
 }
 
+/* Editable grids zero field margins; restore vertical rhythm in homepage editor. */
+.ed-homepage-editor-shell .ed-editable-form .ed-form-grid {
+  row-gap: 1.25rem;
+  column-gap: 1rem;
+}
+
+.ed-homepage-editor-shell .ed-editable-form .ed-form-grid .ed-field {
+  margin-bottom: 0;
+}
+
 .ed-homepage-editor-shell .ed-field__label {
   color: var(--ed-on-surface-variant);
   font-weight: 600;
@@ -5373,8 +5383,13 @@
 .ed-marketing-media-logo {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
+}
+
+.ed-homepage-editor-site-blurb {
+  display: block;
+  padding-top: 0.25rem;
 }
 
 .ed-marketing-media-logo__preview {
