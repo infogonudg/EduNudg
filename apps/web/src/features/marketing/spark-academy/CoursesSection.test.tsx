@@ -93,8 +93,11 @@ describe("CoursesSection", () => {
 
   it("regression_spark_course_card_media_uses_shared_aspect_ratio", () => {
     const css = readFileSync(resolve(__dirname, "spark-academy.css"), "utf8");
-    expect(css).toMatch(/\.sa-course-card__media \{[\s\S]*aspect-ratio:\s*16\s*\/\s*9/);
-    expect(css).toMatch(/\.sa-course-card__photo \{[\s\S]*object-fit:\s*contain/);
-    expect(css).not.toMatch(/\.sa-course-card__media--image \{[\s\S]*height:\s*auto/);
+    expect(css).toMatch(/\.sa-course-card__media \{[\s\S]*?aspect-ratio:\s*16\s*\/\s*9/);
+    expect(css).toMatch(/\.sa-course-card__photo \{[\s\S]*?object-fit:\s*contain/);
+    // Scope to this rule only — a later `height: auto` elsewhere in the file must not fail.
+    const mediaImageRule = css.match(/\.sa-course-card__media--image\s*\{[^}]*\}/)?.[0];
+    expect(mediaImageRule).toBeTruthy();
+    expect(mediaImageRule).not.toMatch(/height:\s*auto/);
   });
 });
