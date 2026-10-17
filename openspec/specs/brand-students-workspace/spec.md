@@ -36,6 +36,8 @@ Brand staff (`brand_owner`, `brand_admin`) SHALL see all active `student_enrollm
 - **AND** it shows franchise name and city
 - **AND** it shows program, starting level, current curriculum level, and per-level progress
 - **AND** the view is read-only (center staff remain the operators on `/app/students` of the franchise host)
+- **AND** the directory badge matches the detail: **UNASSIGNED** when no program is set, **ACTIVE** when a program is set without a portal login, **LINKED** when a portal account exists
+- **AND** a student with no program is not labelled **PENDING**
 
 #### Scenario: Deep link opens a student
 

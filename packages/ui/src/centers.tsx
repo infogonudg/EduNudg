@@ -147,6 +147,7 @@ export function CentersDirectoryItem({
   title,
   meta,
   status,
+  statusLabel,
   selected,
   onSelect,
 }: {
@@ -156,6 +157,8 @@ export function CentersDirectoryItem({
   title: string;
   meta?: string;
   status: CenterStatusTone;
+  /** Visible badge text. When omitted, the badge uses the status tone (ACTIVE, PENDING, …). */
+  statusLabel?: ReactNode;
   selected?: boolean;
   onSelect: () => void;
 }) {
@@ -171,7 +174,7 @@ export function CentersDirectoryItem({
         <p className="ed-centers-directory-item__title">{title}</p>
         {meta ? <p className="ed-centers-directory-item__meta">{meta}</p> : null}
       </div>
-      <CenterStatusBadge status={status} />
+      <CenterStatusBadge status={status}>{statusLabel}</CenterStatusBadge>
     </button>
   );
 }

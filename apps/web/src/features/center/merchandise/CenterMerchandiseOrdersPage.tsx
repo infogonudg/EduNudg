@@ -116,7 +116,11 @@ export function CenterMerchandiseOrdersPage() {
   const { isDesktop, isMobile } = useCommerceBreakpoint();
 
   const tab = tabFromSearchParams(searchParams);
-  const setTab = (next: MerchTab) => {
+  const [stat, setStat] = useState<"catalog" | "unpaid" | "orders" | "total">(
+    tab === "orders" ? "orders" : "catalog",
+  );
+  const setTab = (next: MerchTab, nextStat?: "catalog" | "unpaid" | "orders" | "total") => {
+    setStat(nextStat ?? (next === "orders" ? "orders" : "catalog"));
     if (next === "shop") setSearchParams({});
     else setSearchParams({ tab: next });
   };
@@ -510,31 +514,31 @@ export function CenterMerchandiseOrdersPage() {
           label="Catalog"
           value={pageCounts.catalog}
           hint="Live SKUs"
-          active={tab === "shop"}
-          onClick={() => setTab("shop")}
+          active={stat === "catalog"}
+          onClick={() => setTab("shop", "catalog")}
         />
         <LeadKpiCard
           label="Unpaid"
           value={pageCounts.unpaid}
           hint="Needs payment"
           tone="lost"
-          active={tab === "orders"}
-          onClick={() => setTab("orders")}
+          active={stat === "unpaid"}
+          onClick={() => setTab("orders", "unpaid")}
         />
         <LeadKpiCard
           label="Orders"
           value={pageCounts.orders}
           hint="Center orders"
-          active={tab === "orders"}
-          onClick={() => setTab("orders")}
+          active={stat === "orders"}
+          onClick={() => setTab("orders", "orders")}
         />
         <LeadKpiCard
           label={isMobile ? "All items" : "Total"}
           value={pageCounts.total}
           hint="Catalog SKUs"
           tone="total"
-          active={tab === "shop"}
-          onClick={() => setTab("shop")}
+          active={stat === "total"}
+          onClick={() => setTab("shop", "total")}
         />
       </LeadKpiGrid>
 

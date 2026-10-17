@@ -79,6 +79,7 @@ Traceability: FR-B10
 
 - **WHEN** brand staff open Student Leads
 - **THEN** the page shows a pipeline header, KPI cards (Pending review, Converted, Lost, Total), search, and **Pending review** / **Decided** tabs
+- **AND** the highlighted KPI card is the one that was clicked (Converted must not light Lost)
 - **AND** the lead list remains visible while a lead is selected on desktop
 - **AND** search finds matching leads from any status without switching tabs
 - **AND** assignment management stacks below applicant details (two-column page: list + stacked detail)

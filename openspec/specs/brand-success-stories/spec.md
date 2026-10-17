@@ -21,6 +21,7 @@ Brand staff SHALL manage success stories at `/app/success-stories` with the same
 - **GIVEN** a brand user on `/app/success-stories`
 - **THEN** the page uses `PipelinePageHeader` + `LeadKpiGrid` + search + `FilterTabs` + `PipelineWorkspace`
 - **AND** stats cards show Published, Draft, With photo, and Total
+- **AND** clicking Total highlights Total (it must not light Published)
 - **AND** filter tabs are **Published** and **Draft**
 
 #### Scenario: Add story uses a modal

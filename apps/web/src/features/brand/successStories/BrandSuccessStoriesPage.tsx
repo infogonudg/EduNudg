@@ -82,6 +82,7 @@ export function BrandSuccessStoriesPage() {
   const storySaved = useSavedFlash();
   const { isDesktop, isMobile } = useOpsBreakpoint();
   const [filter, setFilter] = useState<StoryFilter>("published");
+  const [stat, setStat] = useState<"published" | "draft" | "all">("published");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -146,7 +147,10 @@ export function BrandSuccessStoriesPage() {
 
   const all = stories.data ?? [];
   const counts = useMemo(() => storyCounts(all), [all]);
-  const filtered = useMemo(() => filterStories(all, filter, search), [all, filter, search]);
+  const filtered = useMemo(() => {
+    if (stat === "all" && !search.trim()) return all;
+    return filterStories(all, filter, search);
+  }, [all, filter, search, stat]);
   const selected = all.find((row) => row.id === selectedId) ?? null;
   const now = Date.now();
 
@@ -285,15 +289,21 @@ export function BrandSuccessStoriesPage() {
           label="Published"
           value={counts.published}
           hint={counts.published > 0 ? "On marketing site" : undefined}
-          active={filter === "published"}
-          onClick={() => setFilter("published")}
+          active={stat === "published"}
+          onClick={() => {
+            setStat("published");
+            setFilter("published");
+          }}
         />
         <LeadKpiCard
           label="Draft"
           value={counts.draft}
           hint="Not published"
-          active={filter === "draft"}
-          onClick={() => setFilter("draft")}
+          active={stat === "draft"}
+          onClick={() => {
+            setStat("draft");
+            setFilter("draft");
+          }}
         />
         <LeadKpiCard label="With photo" value={counts.withPhoto} hint="Has image" />
         <LeadKpiCard
@@ -301,7 +311,8 @@ export function BrandSuccessStoriesPage() {
           value={counts.all}
           hint="All stories"
           tone="total"
-          onClick={() => setFilter("published")}
+          active={stat === "all"}
+          onClick={() => setStat("all")}
         />
       </LeadKpiGrid>
 
@@ -316,7 +327,15 @@ export function BrandSuccessStoriesPage() {
             aria-label="Search stories"
           />
         </label>
-        <FilterTabs options={filterTabs} value={filter} onChange={setFilter} aria-label="Story filter" />
+        <FilterTabs
+          options={filterTabs}
+          value={filter}
+          onChange={(next) => {
+            setFilter(next);
+            setStat(next === "draft" ? "draft" : "published");
+          }}
+          aria-label="Story filter"
+        />
       </div>
 
       <PipelineWorkspace

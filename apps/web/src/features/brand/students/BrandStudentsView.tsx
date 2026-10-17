@@ -22,6 +22,7 @@ import {
   studentDirectoryMeta,
   studentInitials,
   studentPageCounts,
+  studentStatusLabel,
   studentStatusTone,
   type BrandStudentFilter,
 } from "@/features/brand/students/brandStudentsHelpers";
@@ -115,6 +116,7 @@ export function BrandStudentsView() {
             title={student.full_name}
             meta={studentDirectoryMeta(student)}
             status={studentStatusTone(student)}
+            statusLabel={studentStatusLabel(student)}
             selected={student.enrollment_id === selectedKey}
             onSelect={() => selectStudent(student.enrollment_id)}
           />

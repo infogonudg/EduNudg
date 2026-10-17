@@ -101,6 +101,17 @@ describe("BrandSuccessStoriesPage", () => {
     expect(screen.getByRole("tab", { name: /Draft \(1\)/ }).getAttribute("aria-selected")).toBe("true");
   });
 
+  it("regression_success_stories_total_kpi_does_not_highlight_published", async () => {
+    mockStories.splice(0, mockStories.length, publishedStory);
+    const { container } = renderPage();
+    await screen.findByRole("tab", { name: /Published/ });
+    const cards = container.querySelectorAll(".ed-lead-kpi");
+    expect(cards[0]!.classList.contains("is-active")).toBe(true);
+    fireEvent.click(cards[3]!);
+    expect(cards[3]!.classList.contains("is-active")).toBe(true);
+    expect(cards[0]!.classList.contains("is-active")).toBe(false);
+  });
+
   it("regression_success_stories_pipeline_list_with_filter_tabs", async () => {
     renderPage();
     expect(await screen.findByRole("tablist", { name: "Story filter" })).toBeDefined();

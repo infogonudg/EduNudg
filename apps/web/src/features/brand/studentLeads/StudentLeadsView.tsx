@@ -29,6 +29,7 @@ import {
   filterLeads,
   formatLeadListDate,
   formatLeadRelativeWhen,
+  isConvertedLead,
   LEAD_FILTER_OPTIONS,
   leadAvatarTone,
   leadCounts,
@@ -68,6 +69,8 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
   const { error, clear, capture } = useMutationError();
   const { isDesktop, isMobile } = useOpsBreakpoint();
   const [filter, setFilter] = useState<LeadFilter>("pending");
+  /** Converted and Lost both open Decided, so the highlighted card is tracked separately. */
+  const [stat, setStat] = useState<"pending" | "converted" | "lost" | "all" | "decided">("pending");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [assignMode, setAssignMode] = useState(false);
@@ -104,10 +107,16 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
   const allLeads = leads.data ?? [];
   const now = Date.now();
   const counts = useMemo(() => leadCounts(allLeads, now), [allLeads, now]);
-  const filtered = useMemo(
-    () => sortLeads(filterLeads(allLeads, filter, now, search), "newest"),
-    [allLeads, filter, search, now],
-  );
+  const filtered = useMemo(() => {
+    if (stat === "all" && !search.trim()) return sortLeads(allLeads, "newest");
+    const bucket: LeadFilter =
+      stat === "converted" || stat === "lost" || stat === "decided" ? "decided" : filter;
+    const base = sortLeads(filterLeads(allLeads, bucket, now, search), "newest");
+    if (search.trim()) return base;
+    if (stat === "converted") return base.filter((lead) => isConvertedLead(lead));
+    if (stat === "lost") return base.filter((lead) => lead.status === "lost");
+    return base;
+  }, [allLeads, filter, now, search, stat]);
   const selected = allLeads.find((row) => row.id === selectedId) ?? null;
 
   const suggestions = useQuery({
@@ -196,7 +205,13 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
     <div className="ed-franchise-apps-page__empty">
       <p>No student leads in this view.</p>
       {filter !== "pending" ? (
-        <Button variant="ghost" onClick={() => setFilter("pending")}>
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setFilter("pending");
+            setStat("pending");
+          }}
+        >
           Show pending review
         </Button>
       ) : null}
@@ -347,28 +362,39 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
           label="Pending review"
           value={counts.pending}
           hint={counts.pending > 0 ? "In queue" : undefined}
-          active={filter === "pending"}
-          onClick={() => setFilter("pending")}
+          active={stat === "pending"}
+          onClick={() => {
+            setStat("pending");
+            setFilter("pending");
+          }}
         />
         <LeadKpiCard
           label="Converted"
           value={counts.converted}
           hint="Enrolled"
-          onClick={() => setFilter("decided")}
+          active={stat === "converted"}
+          onClick={() => {
+            setStat("converted");
+            setFilter("decided");
+          }}
         />
         <LeadKpiCard
           label="Lost"
           value={counts.lost}
           tone="lost"
-          active={filter === "decided"}
-          onClick={() => setFilter("decided")}
+          active={stat === "lost"}
+          onClick={() => {
+            setStat("lost");
+            setFilter("decided");
+          }}
         />
         <LeadKpiCard
           label={isMobile ? "All leads" : "Total"}
           value={counts.all}
           hint="All leads"
           tone="total"
-          onClick={() => setFilter("pending")}
+          active={stat === "all"}
+          onClick={() => setStat("all")}
         />
       </LeadKpiGrid>
 
@@ -386,7 +412,10 @@ export function StudentLeadsView({ brandId }: { brandId: string }) {
         <FilterTabs
           options={filterTabs}
           value={filter}
-          onChange={setFilter}
+          onChange={(next) => {
+            setFilter(next);
+            setStat(next === "pending" ? "pending" : "decided");
+          }}
           aria-label="Lead filter"
         />
       </div>
