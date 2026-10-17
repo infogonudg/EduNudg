@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@edunudg/ui";
@@ -193,5 +193,28 @@ describe("CenterMerchandiseOrdersPage", () => {
     expect(screen.getByText("Shipping Directory")).toBeDefined();
     expect(await screen.findByText("Pay Now")).toBeDefined();
     expect(document.querySelector(".ed-pipeline-workspace")).toBeTruthy();
+  });
+
+  it("regression_center_merchandise_unpaid_kpi_does_not_highlight_orders", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { container } = render(
+      <QueryClientProvider client={qc}>
+        <ThemeProvider>
+          <MemoryRouter initialEntries={["/app/merchandise"]}>
+            <CenterMerchandiseOrdersPage />
+          </MemoryRouter>
+        </ThemeProvider>
+      </QueryClientProvider>
+    );
+
+    await screen.findByText("Abacus kit");
+    const cards = container.querySelectorAll(".ed-lead-kpi");
+    expect(cards[0]!.classList.contains("is-active")).toBe(true);
+    fireEvent.click(cards[1]!);
+    expect(cards[1]!.classList.contains("is-active")).toBe(true);
+    expect(cards[2]!.classList.contains("is-active")).toBe(false);
+    fireEvent.click(cards[3]!);
+    expect(cards[3]!.classList.contains("is-active")).toBe(true);
+    expect(cards[0]!.classList.contains("is-active")).toBe(false);
   });
 });

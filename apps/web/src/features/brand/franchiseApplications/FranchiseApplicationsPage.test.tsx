@@ -118,8 +118,33 @@ describe("FranchiseApplicationsPage", () => {
     const kpiValues = [...container.querySelectorAll(".ed-lead-kpi__value")].map((el) => el.textContent);
     expect(kpiValues).toEqual(["1", "1", "1", "3"]);
 
-    fireEvent.click(container.querySelectorAll(".ed-lead-kpi")[1]!);
+    const cards = container.querySelectorAll(".ed-lead-kpi");
+    fireEvent.click(cards[1]!);
     expect(screen.getByRole("tab", { name: /Decided \(2\)/ }).getAttribute("aria-selected")).toBe("true");
+    expect(cards[1]!.classList.contains("is-active")).toBe(true);
+    expect(cards[2]!.classList.contains("is-active")).toBe(false);
+
+    fireEvent.click(cards[2]!);
+    expect(cards[2]!.classList.contains("is-active")).toBe(true);
+    expect(cards[1]!.classList.contains("is-active")).toBe(false);
+  });
+
+  it("regression_franchise_apps_kpi_click_highlights_the_clicked_card", async () => {
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { container } = render(
+      <QueryClientProvider client={qc}>
+        <FranchiseApplicationsPage />
+      </QueryClientProvider>
+    );
+    await screen.findByRole("tab", { name: /Pending review/ });
+    const cards = container.querySelectorAll(".ed-lead-kpi");
+    expect(cards[0]!.classList.contains("is-active")).toBe(true);
+    fireEvent.click(cards[1]!);
+    expect(cards[1]!.classList.contains("is-active")).toBe(true);
+    expect(cards[2]!.classList.contains("is-active")).toBe(false);
+    fireEvent.click(cards[3]!);
+    expect(cards[3]!.classList.contains("is-active")).toBe(true);
+    expect(cards[0]!.classList.contains("is-active")).toBe(false);
   });
 
   it("regression_franchise_name_opens_full_application_detail", async () => {

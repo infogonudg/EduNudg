@@ -196,6 +196,16 @@ describe("BrandStudentsPage", () => {
     });
   });
 
+  it("regression_brand_student_directory_shows_unassigned_not_pending", async () => {
+    renderPage();
+    await screen.findByText("Arjun Rao");
+    expect(screen.getAllByText("UNASSIGNED").length).toBeGreaterThan(0);
+    expect(screen.queryByText("PENDING")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /Arjun Rao/ }));
+    expect(await screen.findAllByText("UNASSIGNED")).toHaveLength(2);
+    expect(screen.queryByText("PENDING")).toBeNull();
+  });
+
   it("regression_brand_student_card_shows_contact_and_levels", async () => {
     renderPage(["/app/students?student=s1"]);
     expect(await screen.findByText("Student ID: SBA-101")).toBeDefined();

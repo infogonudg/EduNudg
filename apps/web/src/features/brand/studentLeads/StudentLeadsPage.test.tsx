@@ -122,8 +122,24 @@ describe("StudentLeadsPage", () => {
     expect(container.querySelector(".ed-pipeline-workspace__detail")).not.toBeNull();
     expect(screen.queryByText("Follow-up Insights")).toBeNull();
 
-    fireEvent.click(container.querySelectorAll(".ed-lead-kpi")[1]!);
+    const cards = container.querySelectorAll(".ed-lead-kpi");
+    fireEvent.click(cards[1]!);
     expect(screen.getByRole("tab", { name: "Decided (0)" }).getAttribute("aria-selected")).toBe("true");
+    expect(cards[1]!.classList.contains("is-active")).toBe(true);
+    expect(cards[2]!.classList.contains("is-active")).toBe(false);
+  });
+
+  it("regression_student_leads_kpi_click_highlights_the_clicked_card", async () => {
+    mockLeads.splice(0, mockLeads.length, sampleLead);
+    const { container } = renderPage();
+    await screen.findByRole("button", { name: /Arti Rathi/ });
+    const cards = container.querySelectorAll(".ed-lead-kpi");
+    fireEvent.click(cards[1]!);
+    expect(cards[1]!.classList.contains("is-active")).toBe(true);
+    expect(cards[2]!.classList.contains("is-active")).toBe(false);
+    fireEvent.click(cards[2]!);
+    expect(cards[2]!.classList.contains("is-active")).toBe(true);
+    expect(cards[1]!.classList.contains("is-active")).toBe(false);
   });
 
   it("regression_student_leads_detail_stacks_assignment_below_applicant", async () => {

@@ -97,6 +97,7 @@ Center staff SHALL shop and track kit orders at `/app/merchandise` with the same
 - **GIVEN** a center user on `/app/merchandise`
 - **THEN** the page uses `PipelinePageHeader` + `LeadKpiGrid` like Curriculum
 - **AND** stats cards show Catalog, Unpaid, Orders, and Total
+- **AND** the highlighted card is the one that was clicked (Unpaid must not light Orders; Total must not light Catalog)
 - **AND** section tabs remain Shop and My Orders
 - **AND** desktop Shop keeps the catalog beside checkout in `PipelineWorkspace`
 - **AND** Shop catalog cards are full-width horizontal rows (one SKU per row), not a two-column product grid

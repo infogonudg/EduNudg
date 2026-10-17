@@ -29,6 +29,8 @@ import {
   INQUIRY_FILTER_OPTIONS,
   inquiryAvatarTone,
   inquiryCounts,
+  isApprovedInquiry,
+  isRejectedInquiry,
   inquiryListTitle,
   inquiryLocationLine,
   inquiryMobileLocation,
@@ -65,6 +67,8 @@ export function FranchiseApplicationsPage() {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
   const [filter, setFilter] = useState<InquiryFilter>("pending");
+  /** Which stat card is highlighted. Approved and Rejected both open Decided, so the highlight cannot follow `filter` alone. */
+  const [stat, setStat] = useState<"pending" | "approved" | "rejected" | "all" | "decided">("pending");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rejectMode, setRejectMode] = useState(false);
@@ -104,10 +108,16 @@ export function FranchiseApplicationsPage() {
     [deletedCenters.data],
   );
   const counts = useMemo(() => inquiryCounts(all), [all]);
-  const filtered = useMemo(
-    () => filterInquiries(all, filter, search, deletedCenterIds),
-    [all, filter, search, deletedCenterIds],
-  );
+  const filtered = useMemo(() => {
+    if (stat === "all" && !search.trim()) return all;
+    const bucket: InquiryFilter =
+      stat === "approved" || stat === "rejected" || stat === "decided" ? "decided" : filter;
+    const base = filterInquiries(all, bucket, search, deletedCenterIds);
+    if (search.trim()) return base;
+    if (stat === "approved") return base.filter((row) => isApprovedInquiry(row));
+    if (stat === "rejected") return base.filter((row) => isRejectedInquiry(row));
+    return base;
+  }, [all, filter, search, deletedCenterIds, stat]);
   const selected = all.find((row) => row.id === selectedId) ?? null;
   const now = Date.now();
 
@@ -196,7 +206,13 @@ export function FranchiseApplicationsPage() {
     <div className="ed-franchise-apps-page__empty">
       <p>No franchise applications in this view.</p>
       {filter !== "pending" ? (
-        <Button variant="ghost" onClick={() => setFilter("pending")}>
+        <Button
+          variant="ghost"
+          onClick={() => {
+            setFilter("pending");
+            setStat("pending");
+          }}
+        >
           Show pending review
         </Button>
       ) : null}
@@ -300,28 +316,39 @@ export function FranchiseApplicationsPage() {
           label="Pending review"
           value={counts.pending}
           hint={counts.pending > 0 ? "In queue" : undefined}
-          active={filter === "pending"}
-          onClick={() => setFilter("pending")}
+          active={stat === "pending"}
+          onClick={() => {
+            setStat("pending");
+            setFilter("pending");
+          }}
         />
         <LeadKpiCard
           label="Approved"
           value={counts.approved}
           hint="Created centers"
-          onClick={() => setFilter("decided")}
+          active={stat === "approved"}
+          onClick={() => {
+            setStat("approved");
+            setFilter("decided");
+          }}
         />
         <LeadKpiCard
           label="Rejected"
           value={counts.rejected}
           tone="lost"
-          active={filter === "decided"}
-          onClick={() => setFilter("decided")}
+          active={stat === "rejected"}
+          onClick={() => {
+            setStat("rejected");
+            setFilter("decided");
+          }}
         />
         <LeadKpiCard
           label={isMobile ? "All apps" : "Total"}
           value={counts.all}
           hint="All applications"
           tone="total"
-          onClick={() => setFilter("pending")}
+          active={stat === "all"}
+          onClick={() => setStat("all")}
         />
       </LeadKpiGrid>
 
@@ -339,7 +366,10 @@ export function FranchiseApplicationsPage() {
         <FilterTabs
           options={desktopFilterTabs}
           value={filter}
-          onChange={setFilter}
+          onChange={(next) => {
+            setFilter(next);
+            setStat(next === "pending" ? "pending" : "decided");
+          }}
           aria-label="Application filter"
         />
       </div>

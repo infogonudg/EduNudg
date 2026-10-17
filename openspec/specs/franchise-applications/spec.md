@@ -68,6 +68,7 @@ Traceability: FR-B20
 - **WHEN** brand staff open Franchise Applications
 - **THEN** filter tabs are **Pending review** and **Decided** only
 - **AND** a stats strip shows Pending review, Approved, Rejected, and Total (same `LeadKpiGrid` chrome as Student Leads)
+- **AND** the highlighted stat card is the one that was clicked (Approved must not light Rejected; Total must not light Pending review)
 - **AND** pending inquiries from public and manual entry are listed under **Pending review**
 
 #### Scenario: Search finds applications from any tab
