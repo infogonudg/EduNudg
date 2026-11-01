@@ -106,6 +106,30 @@ export async function grantCenterMerchandiseStock(input: {
   return String(data);
 }
 
+export async function updateMerchandiseStockGrant(input: {
+  grantId: string;
+  centerId: string;
+  catalogItemId: string;
+  quantity: number;
+  note?: string;
+}): Promise<void> {
+  const { error } = await getSupabase().rpc("update_merchandise_stock_grant", {
+    p_grant_id: input.grantId,
+    p_center_id: input.centerId,
+    p_catalog_item_id: input.catalogItemId,
+    p_quantity: input.quantity,
+    p_note: input.note?.trim() || null,
+  });
+  if (error) throw error;
+}
+
+export async function deleteMerchandiseStockGrant(grantId: string): Promise<void> {
+  const { error } = await getSupabase().rpc("delete_merchandise_stock_grant", {
+    p_grant_id: grantId,
+  });
+  if (error) throw error;
+}
+
 export function matchesStockGrantSearch(row: MerchandiseStockGrantRow, search: string): boolean {
   const q = search.trim().toLowerCase();
   if (!q) return true;

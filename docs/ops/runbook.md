@@ -166,8 +166,8 @@ pnpm hooks:install  # installs .githooks/pre-push (also runs on pnpm install via
 | File | Role |
 |------|------|
 | `.cursor/skills/edunudg-pre-push-ci` | Agent must run `pnpm ci:local` → auto-fix → green **before** push |
-| `.cursor/hooks.json` | `beforeShellExecution` on `git push` → `gate-git-push.sh`; `stop` finish-gate also checks push+CI |
-| `.cursor/hooks/gate-git-push.sh` | **Denies** `git push` without a recent green stamp for HEAD; **asks** for `SKIP_CI_LOCAL=1` |
+| `.cursor/hooks.json` | `beforeShellExecution` on `git push` → `node .cursor/hooks/gate-git-push.mjs`; `stop` finish-gate also checks push+CI |
+| `.cursor/hooks/gate-git-push.mjs` | **Denies** `git push` without a recent green stamp for HEAD; **asks** for `SKIP_CI_LOCAL=1` (Windows-safe; `.sh` wraps the same script) |
 | `.githooks/pre-push` | Backup: runs `pnpm ci:local` (or accepts stamp) before allowing the push |
 
 Skill: `edunudg-pre-push-ci`. OpenSpec: [`agent-artifact-sync`](../../openspec/specs/agent-artifact-sync/spec.md).

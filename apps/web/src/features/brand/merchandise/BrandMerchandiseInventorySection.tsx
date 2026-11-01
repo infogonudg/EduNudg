@@ -1,18 +1,30 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FormGrid, Input, MutationError, PipelineWorkspace, Select } from "@edunudg/ui";
+import { MutationError, PipelineWorkspace } from "@edunudg/ui";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import { fetchBrandCenters } from "@/lib/centerCentersApi";
 import { listMerchandiseCatalog } from "@/lib/merchandiseOrdersApi";
 import {
+  deleteMerchandiseStockGrant,
   filterMerchandiseStockGrants,
   formatStockGrantWhen,
   grantCenterMerchandiseStock,
   listBrandMerchandiseStockGrants,
+  updateMerchandiseStockGrant,
   type MerchandiseStockGrantRow,
 } from "@/lib/merchandiseStockGrantsApi";
 import { useMutationError } from "@/features/platform/hooks/useMutationError";
+import { useSavedFlash } from "@/features/shared/useSavedFlash";
+import { ConfirmDeleteDialog } from "@/features/shared/ConfirmDeleteDialog";
 import { BrandMerchandiseAddStockPanel } from "./BrandMerchandiseAddStockPanel";
+import { BrandMerchandiseStockGrantCard } from "./BrandMerchandiseStockGrantCard";
+import {
+  BrandMerchandiseStockFormFields,
+  emptyStockForm,
+  isStockFormValid,
+  stockFormQuantity,
+  type StockForm,
+} from "./BrandMerchandiseStockFormFields";
 import { MerchandisePipelineListItem } from "./MerchandisePipelineListItem";
 import "./brandMerchandiseCatalog.css";
 
@@ -23,19 +35,14 @@ type Props = {
   search?: string;
 };
 
-type StockForm = {
-  centerId: string;
-  catalogItemId: string;
-  quantity: string;
-  note: string;
-};
-
-const emptyForm = (): StockForm => ({
-  centerId: "",
-  catalogItemId: "",
-  quantity: "1",
-  note: "",
-});
+function grantToForm(item: MerchandiseStockGrantRow): StockForm {
+  return {
+    centerId: item.center_id,
+    catalogItemId: item.catalog_item_id,
+    quantity: String(item.quantity),
+    note: item.note ?? "",
+  };
+}
 
 export function BrandMerchandiseInventorySection({
   brandId,
@@ -45,9 +52,15 @@ export function BrandMerchandiseInventorySection({
 }: Props) {
   const qc = useQueryClient();
   const { error, clear, capture } = useMutationError();
+  const grantSaved = useSavedFlash();
   const { isDesktop } = useOpsBreakpoint();
-  const [form, setForm] = useState<StockForm>(emptyForm);
+  const [form, setForm] = useState<StockForm>(emptyStockForm);
+  const [editForm, setEditForm] = useState<StockForm>(emptyStockForm);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const needsLookups = formOpen || !!editingId;
 
   const grants = useQuery({
     queryKey: ["merchandise-stock-grants", brandId],
@@ -57,13 +70,13 @@ export function BrandMerchandiseInventorySection({
 
   const centers = useQuery({
     queryKey: ["brand-centers", brandId],
-    enabled: !!brandId && formOpen,
+    enabled: !!brandId && needsLookups,
     queryFn: () => fetchBrandCenters(brandId),
   });
 
   const catalog = useQuery({
     queryKey: ["merchandise-catalog", brandId],
-    enabled: !!brandId && formOpen,
+    enabled: !!brandId && needsLookups,
     queryFn: () => listMerchandiseCatalog(brandId),
   });
 
@@ -74,6 +87,7 @@ export function BrandMerchandiseInventorySection({
     if (formOpen) return;
     if (selectedId && filteredItems.some((item) => item.id === selectedId)) return;
     setSelectedId(filteredItems[0]?.id ?? null);
+    setEditingId(null);
   }, [filteredItems, formOpen, selectedId]);
 
   useEffect(() => {
@@ -90,13 +104,9 @@ export function BrandMerchandiseInventorySection({
   const invalidate = () => void qc.invalidateQueries({ queryKey: ["merchandise-stock-grants", brandId] });
 
   const closeAddForm = () => {
-    setForm(emptyForm());
+    setForm(emptyStockForm());
     onFormOpenChange?.(false);
   };
-
-  const qty = Number.parseInt(form.quantity, 10);
-  const canSubmit =
-    Boolean(form.centerId && form.catalogItemId) && Number.isFinite(qty) && qty >= 1;
 
   const create = useMutation({
     mutationFn: async () => {
@@ -105,18 +115,56 @@ export function BrandMerchandiseInventorySection({
         brandId,
         centerId: form.centerId,
         catalogItemId: form.catalogItemId,
-        quantity: qty,
+        quantity: stockFormQuantity(form),
         note: form.note,
       });
     },
     onSuccess: (grantId) => {
       invalidate();
-      setForm(emptyForm());
+      setForm(emptyStockForm());
       setSelectedId(grantId);
       onFormOpenChange?.(false);
     },
     onError: capture,
   });
+
+  const update = useMutation({
+    mutationFn: async (id: string) => {
+      clear();
+      await updateMerchandiseStockGrant({
+        grantId: id,
+        centerId: editForm.centerId,
+        catalogItemId: editForm.catalogItemId,
+        quantity: stockFormQuantity(editForm),
+        note: editForm.note,
+      });
+    },
+    onSuccess: () => {
+      invalidate();
+      grantSaved.flash();
+      window.setTimeout(() => setEditingId(null), 1500);
+    },
+    onError: capture,
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      clear();
+      await deleteMerchandiseStockGrant(id);
+    },
+    onSuccess: (_void, id) => {
+      invalidate();
+      setDeleteId(null);
+      setEditingId(null);
+      if (selectedId === id) setSelectedId(null);
+    },
+    onError: capture,
+  });
+
+  const startEdit = (item: MerchandiseStockGrantRow) => {
+    setEditingId(item.id);
+    setEditForm(grantToForm(item));
+  };
 
   const selectedItem = filteredItems.find((item) => item.id === selectedId) ?? null;
 
@@ -134,39 +182,39 @@ export function BrandMerchandiseInventorySection({
       label: `${item.name} (${item.sku})`,
     }));
 
+  const editCenterOptions =
+    centerOptions.length > 0
+      ? centerOptions
+      : selectedItem
+        ? [{ value: selectedItem.center_id, label: selectedItem.center_label }]
+        : [];
+
+  const editCatalogOptions =
+    catalogOptions.length > 0
+      ? catalogOptions
+      : selectedItem
+        ? [
+            {
+              value: selectedItem.catalog_item_id,
+              label: `${selectedItem.catalog_name} (${selectedItem.catalog_sku})`,
+            },
+          ]
+        : [];
+
   const addPanel = (
     <BrandMerchandiseAddStockPanel
       open={formOpen}
       onSubmit={() => create.mutate()}
       onClose={closeAddForm}
-      submitDisabled={!canSubmit}
+      submitDisabled={!isStockFormValid(form)}
       submitPending={create.isPending}
     >
-      <FormGrid>
-        <Select
-          label="Franchise"
-          value={form.centerId}
-          onChange={(value) => setForm((prev) => ({ ...prev, centerId: value }))}
-          options={centerOptions}
-        />
-        <Select
-          label="SKU"
-          value={form.catalogItemId}
-          onChange={(value) => setForm((prev) => ({ ...prev, catalogItemId: value }))}
-          options={catalogOptions}
-        />
-        <Input
-          label="Quantity"
-          type="number"
-          value={form.quantity}
-          onChange={(value) => setForm((prev) => ({ ...prev, quantity: value }))}
-        />
-        <Input
-          label="Note (optional)"
-          value={form.note}
-          onChange={(value) => setForm((prev) => ({ ...prev, note: value }))}
-        />
-      </FormGrid>
+      <BrandMerchandiseStockFormFields
+        form={form}
+        onChange={setForm}
+        centerOptions={centerOptions}
+        catalogOptions={catalogOptions}
+      />
     </BrandMerchandiseAddStockPanel>
   );
 
@@ -193,58 +241,36 @@ export function BrandMerchandiseInventorySection({
           onClick={() => {
             setSelectedId(item.id);
             onFormOpenChange?.(false);
+            setEditingId(null);
           }}
         />
       ))}
     </div>
   );
 
-  const renderDetail = (item: MerchandiseStockGrantRow) => (
-    <div className="ed-brand-merch-catalog">
-      <article className="ed-brand-merch-card ed-brand-merch-card--simple">
-        <div className="ed-brand-merch-card__inner">
-          <div className="ed-brand-merch-card__details">
-            <div className="ed-brand-merch-card__head">
-              <div className="ed-brand-merch-card__title-row">
-                <h3 className="ed-brand-merch-card__title">{item.catalog_name}</h3>
-                <span className="ed-brand-merch-card__badge ed-brand-merch-card__badge--active">
-                  +{item.quantity}
-                </span>
-              </div>
-              <p className="ed-brand-merch-card__price ed-brand-merch-card__price--active">
-                {item.catalog_sku}
-              </p>
-            </div>
-            <div className="ed-brand-merch-card__fields">
-              <div className="ed-brand-merch-card__field">
-                <span>Franchise</span>
-                <strong>{item.center_label}</strong>
-              </div>
-              <div className="ed-brand-merch-card__field">
-                <span>Granted</span>
-                <strong>{formatStockGrantWhen(item.created_at)}</strong>
-              </div>
-              <div className="ed-brand-merch-card__field">
-                <span>Quantity</span>
-                <strong>{item.quantity}</strong>
-              </div>
-              {item.note ? (
-                <div className="ed-brand-merch-card__field">
-                  <span>Note</span>
-                  <strong>{item.note}</strong>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </article>
-    </div>
+  const renderCard = (item: MerchandiseStockGrantRow) => (
+    <BrandMerchandiseStockGrantCard
+      key={item.id}
+      item={item}
+      editing={editingId === item.id}
+      editForm={editForm}
+      centerOptions={editCenterOptions}
+      catalogOptions={editCatalogOptions}
+      saveDisabled={!isStockFormValid(editForm)}
+      savePending={update.isPending}
+      saveSaved={grantSaved.saved && editingId === item.id}
+      onEdit={() => startEdit(item)}
+      onCancelEdit={() => setEditingId(null)}
+      onSave={() => update.mutate(item.id)}
+      onDelete={() => setDeleteId(item.id)}
+      onEditFormChange={setEditForm}
+    />
   );
 
   const detailPanel = formOpen ? (
     addPanel
   ) : selectedItem ? (
-    renderDetail(selectedItem)
+    <div className="ed-brand-merch-catalog">{renderCard(selectedItem)}</div>
   ) : (
     <div className="ed-franchise-apps-page__placeholder">
       <p className="ed-text-sm ed-muted">Select a stock grant to review franchise, SKU, and quantity.</p>
@@ -263,12 +289,21 @@ export function BrandMerchandiseInventorySection({
           <div className="ed-brand-merch-catalog">
             {grants.isLoading ? <p className="ed-text-sm ed-muted">Loading stock grants…</p> : null}
             {listEmpty}
-            {filteredItems.map((item) => (
-              <div key={item.id}>{renderDetail(item)}</div>
-            ))}
+            {filteredItems.map((item) => renderCard(item))}
           </div>
         </>
       )}
+
+      <ConfirmDeleteDialog
+        open={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => {
+          if (deleteId) remove.mutate(deleteId);
+        }}
+        title="Delete stock grant?"
+        description="This removes the granted quantity from the franchise inventory on-hand total."
+        confirmPending={remove.isPending}
+      />
     </>
   );
 }

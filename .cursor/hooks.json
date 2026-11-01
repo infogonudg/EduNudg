@@ -3,7 +3,7 @@
   "hooks": {
     "beforeShellExecution": [
       {
-        "command": ".cursor/hooks/gate-git-push.sh",
+        "command": "node .cursor/hooks/gate-git-push.mjs",
         "matcher": "git\\s+push",
         "failClosed": true
       }

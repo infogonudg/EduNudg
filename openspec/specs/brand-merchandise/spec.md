@@ -74,7 +74,16 @@ Brand staff SHALL assign on-hand merchandise stock to a franchise without a shop
 - **AND** the grant appears in the Inventory list
 - **AND** that franchise’s `/app/inventory` on-hand includes the granted quantity
 
-Traceability: regression — `regression_brand_merchandise_inventory_tab_adds_franchise_stock`, `regression_inventory_includes_brand_stock_grants_in_on_hand`, `regression_stock_grant_search_matches_franchise_sku_and_note`.
+#### Scenario: Brand edits or deletes a stock grant
+
+- **GIVEN** brand staff viewing a stock grant on Inventory
+- **WHEN** they choose **Edit Details**, change franchise / SKU / quantity / note, and save
+- **THEN** the client calls `update_merchandise_stock_grant`
+- **WHEN** they choose **Delete** and confirm
+- **THEN** the client calls `delete_merchandise_stock_grant`
+- **AND** center `/app/inventory` on-hand reflects the updated or removed quantity
+
+Traceability: regression — `regression_brand_merchandise_inventory_tab_adds_franchise_stock`, `regression_brand_add_stock_form_calls_grant_rpc`, `regression_brand_stock_grant_edit_calls_update_rpc`, `regression_brand_stock_grant_delete_calls_delete_rpc`, `regression_inventory_includes_brand_stock_grants_in_on_hand`, `regression_stock_grant_search_matches_franchise_sku_and_note`.
 
 ### Requirement: Catalog SKUs are tied to curriculum
 

@@ -2,8 +2,11 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandMerchandiseInventorySection } from "./BrandMerchandiseInventorySection";
+import { DELETE_CONFIRM_PHRASE } from "@/features/shared/confirmDelete";
 
 const grantCenterMerchandiseStock = vi.fn().mockResolvedValue("grant-new");
+const updateMerchandiseStockGrant = vi.fn().mockResolvedValue(undefined);
+const deleteMerchandiseStockGrant = vi.fn().mockResolvedValue(undefined);
 const listBrandMerchandiseStockGrants = vi.fn();
 const fetchBrandCenters = vi.fn();
 const listMerchandiseCatalog = vi.fn();
@@ -15,6 +18,8 @@ vi.mock("@/features/center/hooks/useOpsBreakpoint", () => ({
 vi.mock("@/lib/merchandiseStockGrantsApi", () => ({
   listBrandMerchandiseStockGrants: (...args: unknown[]) => listBrandMerchandiseStockGrants(...args),
   grantCenterMerchandiseStock: (...args: unknown[]) => grantCenterMerchandiseStock(...args),
+  updateMerchandiseStockGrant: (...args: unknown[]) => updateMerchandiseStockGrant(...args),
+  deleteMerchandiseStockGrant: (...args: unknown[]) => deleteMerchandiseStockGrant(...args),
   filterMerchandiseStockGrants: (rows: unknown[], search: string) => {
     const q = search.trim().toLowerCase();
     if (!q) return rows;
@@ -54,6 +59,8 @@ function renderSection(formOpen = true) {
 describe("BrandMerchandiseInventorySection", () => {
   beforeEach(() => {
     grantCenterMerchandiseStock.mockClear();
+    updateMerchandiseStockGrant.mockClear();
+    deleteMerchandiseStockGrant.mockClear();
     listBrandMerchandiseStockGrants.mockResolvedValue([
       {
         id: "grant-1",
@@ -129,5 +136,44 @@ describe("BrandMerchandiseInventorySection", () => {
     expect(await screen.findByText("Level 1 Book")).toBeDefined();
     expect(screen.getAllByText(/Pune Central/).length).toBeGreaterThan(0);
     expect(screen.getByText("BOOK-1")).toBeDefined();
+  });
+
+  it("regression_brand_stock_grant_edit_calls_update_rpc", async () => {
+    renderSection(false);
+    expect(await screen.findByRole("button", { name: "Edit Details" })).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: "Edit Details" }));
+
+    await waitFor(() => {
+      expect(fetchBrandCenters).toHaveBeenCalled();
+    });
+
+    fireEvent.change(screen.getByLabelText("Quantity"), { target: { value: "9" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+
+    await waitFor(() => {
+      expect(updateMerchandiseStockGrant).toHaveBeenCalledWith({
+        grantId: "grant-1",
+        centerId: "center-1",
+        catalogItemId: "item-1",
+        quantity: 9,
+        note: "Seed",
+      });
+    });
+  });
+
+  it("regression_brand_stock_grant_delete_calls_delete_rpc", async () => {
+    renderSection(false);
+    expect(await screen.findByRole("button", { name: /Delete stock grant for Level 1 Book/i })).toBeDefined();
+    fireEvent.click(screen.getByRole("button", { name: /Delete stock grant for Level 1 Book/i }));
+
+    expect(await screen.findByRole("heading", { name: "Delete stock grant?" })).toBeDefined();
+    fireEvent.change(screen.getByLabelText(new RegExp(`Type ${DELETE_CONFIRM_PHRASE}`, "i")), {
+      target: { value: DELETE_CONFIRM_PHRASE },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Delete", exact: true }));
+
+    await waitFor(() => {
+      expect(deleteMerchandiseStockGrant).toHaveBeenCalledWith("grant-1");
+    });
   });
 });

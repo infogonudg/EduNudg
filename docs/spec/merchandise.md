@@ -39,7 +39,7 @@ Brand-configurable: Razorpay checkout, invoice/bank transfer, or both (`brand_se
 
 ## Brand stock grants
 
-Brand `/app/merchandise` → **Inventory** lets staff assign on-hand quantity to a franchise without a shop order (`grant_center_merchandise_stock` → `merchandise_stock_grants`). Center `/app/inventory` adds those grants into on-hand / available alongside received/complete bulk orders (`buildCenterInventorySummary`). Migration `114_merchandise_stock_grants.sql`.
+Brand `/app/merchandise` → **Inventory** lets staff assign on-hand quantity to a franchise without a shop order (`grant_center_merchandise_stock` → `merchandise_stock_grants`), and edit or delete existing grants (`update_merchandise_stock_grant`, `delete_merchandise_stock_grant`). Center `/app/inventory` adds those grants into on-hand / available alongside received/complete bulk orders (`buildCenterInventorySummary`). Migration `114_merchandise_stock_grants.sql`.
 
 ## Related
 

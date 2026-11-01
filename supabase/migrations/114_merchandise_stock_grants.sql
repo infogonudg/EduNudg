@@ -118,3 +118,109 @@ $$;
 
 REVOKE ALL ON FUNCTION public.grant_center_merchandise_stock(uuid, uuid, uuid, int, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.grant_center_merchandise_stock(uuid, uuid, uuid, int, text) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.update_merchandise_stock_grant(
+  p_grant_id uuid,
+  p_center_id uuid,
+  p_catalog_item_id uuid,
+  p_quantity int,
+  p_note text DEFAULT NULL
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_brand_id uuid;
+  v_center_brand uuid;
+  v_item_brand uuid;
+  v_note text;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  IF p_quantity IS NULL OR p_quantity < 1 THEN
+    RAISE EXCEPTION 'quantity must be at least 1';
+  END IF;
+
+  SELECT g.brand_id INTO v_brand_id
+  FROM public.merchandise_stock_grants g
+  WHERE g.id = p_grant_id;
+
+  IF v_brand_id IS NULL THEN
+    RAISE EXCEPTION 'Stock grant not found';
+  END IF;
+
+  IF NOT public.is_platform_admin() AND NOT public.has_brand_access(v_brand_id) THEN
+    RAISE EXCEPTION 'Not authorized';
+  END IF;
+
+  IF NOT public.brand_feature_enabled(v_brand_id, 'merchandise') THEN
+    RAISE EXCEPTION 'feature_disabled';
+  END IF;
+
+  SELECT fc.brand_id INTO v_center_brand
+  FROM public.franchise_centers fc
+  WHERE fc.id = p_center_id
+    AND fc.deleted_at IS NULL;
+
+  IF v_center_brand IS NULL OR v_center_brand <> v_brand_id THEN
+    RAISE EXCEPTION 'Center not found for brand';
+  END IF;
+
+  SELECT mc.brand_id INTO v_item_brand
+  FROM public.merchandise_catalog mc
+  WHERE mc.id = p_catalog_item_id;
+
+  IF v_item_brand IS NULL OR v_item_brand <> v_brand_id THEN
+    RAISE EXCEPTION 'Catalog item not found for brand';
+  END IF;
+
+  v_note := nullif(trim(coalesce(p_note, '')), '');
+
+  UPDATE public.merchandise_stock_grants
+  SET
+    center_id = p_center_id,
+    catalog_item_id = p_catalog_item_id,
+    quantity = p_quantity,
+    note = v_note
+  WHERE id = p_grant_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.update_merchandise_stock_grant(uuid, uuid, uuid, int, text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.update_merchandise_stock_grant(uuid, uuid, uuid, int, text) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.delete_merchandise_stock_grant(p_grant_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_brand_id uuid;
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  SELECT g.brand_id INTO v_brand_id
+  FROM public.merchandise_stock_grants g
+  WHERE g.id = p_grant_id;
+
+  IF v_brand_id IS NULL THEN
+    RAISE EXCEPTION 'Stock grant not found';
+  END IF;
+
+  IF NOT public.is_platform_admin() AND NOT public.has_brand_access(v_brand_id) THEN
+    RAISE EXCEPTION 'Not authorized';
+  END IF;
+
+  DELETE FROM public.merchandise_stock_grants WHERE id = p_grant_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.delete_merchandise_stock_grant(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.delete_merchandise_stock_grant(uuid) TO authenticated;
