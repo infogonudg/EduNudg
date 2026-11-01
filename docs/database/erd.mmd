@@ -31,6 +31,9 @@ erDiagram
   programs ||--o{ merchandise_catalog_programs : supplies
   levels ||--o{ merchandise_catalog_programs : tags
   franchise_centers ||--o{ merchandise_orders : places
+  brands ||--o{ merchandise_stock_grants : grants
+  franchise_centers ||--o{ merchandise_stock_grants : receives
+  merchandise_catalog ||--o{ merchandise_stock_grants : stocks
   brands ||--o{ brand_campaigns : runs
   brands ||--o{ brand_competitions : hosts
   brand_competitions ||--o{ brand_competition_questions : snapshots

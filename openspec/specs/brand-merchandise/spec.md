@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Brand staff manage the merchandise catalog, promo codes, payment settings, and franchise orders at `/app/merchandise`, gated by the `merchandise` feature flag.
+Brand staff manage the merchandise catalog, promo codes, payment settings, franchise orders, and franchise stock grants at `/app/merchandise`, gated by the `merchandise` feature flag.
 
 ## Related
 
@@ -15,7 +15,7 @@ Brand staff manage the merchandise catalog, promo codes, payment settings, and f
 
 ### Requirement: Pipeline chrome on Merchandise
 
-Brand staff SHALL manage merchandise at `/app/merchandise` with the same pipeline chrome as Franchise Applications: page header, KPI stats strip, search, section tabs, and a list with detail beside it on desktop for Catalog, Promo Codes, Orders, and Payment settings.
+Brand staff SHALL manage merchandise at `/app/merchandise` with the same pipeline chrome as Franchise Applications: page header, KPI stats strip, search, section tabs, and a list with detail beside it on desktop for Catalog, Promo Codes, Orders, Inventory, and Payment settings.
 
 #### Scenario: Page chrome matches franchise applications
 
@@ -24,7 +24,8 @@ Brand staff SHALL manage merchandise at `/app/merchandise` with the same pipelin
 - **AND** stats cards show Active, Draft, Orders, and Total
 - **AND** **+ Add Merchandise** remains in the page header on the Catalog section
 - **AND** **+ Add Promo Code** appears in the page header on the Promo Codes section
-- **AND** section tabs remain Catalog, Promo Codes, Orders, and Payment settings
+- **AND** **+ Add stock** appears in the page header on the Inventory section
+- **AND** section tabs remain Catalog, Promo Codes, Orders, Inventory, and Payment settings
 
 #### Scenario: KPI cards filter catalog or open orders
 
@@ -40,13 +41,14 @@ Brand staff SHALL manage merchandise at `/app/merchandise` with the same pipelin
 - **THEN** the page uses `PipelineWorkspace`
 - **AND** column 1 lists SKUs and column 2 shows the selected catalog card
 
-#### Scenario: Desktop promo, orders, and payment tabs match catalog
+#### Scenario: Desktop promo, orders, inventory, and payment tabs match catalog
 
 - **GIVEN** a brand user on `/app/merchandise` on desktop
-- **WHEN** they open Promo Codes, Orders, or Payment settings
+- **WHEN** they open Promo Codes, Orders, Inventory, or Payment settings
 - **THEN** each tab uses `PipelineWorkspace` with a list in column 1 and the selected item in column 2
 - **AND** typing in search filters the current tab and does not switch to Catalog
 - **AND** Promo Codes can add from the page header into the detail column
+- **AND** Inventory can add stock from the page header into the detail column
 - **AND** Payment settings lists Payment mode, Razorpay, Invoice details, and Reminders
 
 ### Requirement: Competitions is not a Merchandise tab
@@ -57,8 +59,31 @@ The Merchandise page SHALL NOT include a Competitions tab.
 
 - **GIVEN** brand staff is on `/app/merchandise`
 - **WHEN** the page renders
-- **THEN** section tabs are Catalog, Promo Codes, Orders, and Payment settings
+- **THEN** section tabs are Catalog, Promo Codes, Orders, Inventory, and Payment settings
 - **AND** no Competitions tab is present
+
+### Requirement: Brand can grant franchise merchandise stock
+
+Brand staff SHALL assign on-hand merchandise stock to a franchise without a shop order via `/app/merchandise` → Inventory. Grants persist in `merchandise_stock_grants` through `grant_center_merchandise_stock` and SHALL increase center `/app/inventory` on-hand / available for assigned-curriculum SKUs.
+
+#### Scenario: Brand adds stock for a franchise
+
+- **GIVEN** brand staff on `/app/merchandise` Inventory
+- **WHEN** they choose **+ Add stock**, pick an active franchise and catalog SKU, and enter a quantity ≥ 1
+- **THEN** the client calls `grant_center_merchandise_stock`
+- **AND** the grant appears in the Inventory list
+- **AND** that franchise’s `/app/inventory` on-hand includes the granted quantity
+
+#### Scenario: Brand edits or deletes a stock grant
+
+- **GIVEN** brand staff viewing a stock grant on Inventory
+- **WHEN** they choose **Edit Details**, change franchise / SKU / quantity / note, and save
+- **THEN** the client calls `update_merchandise_stock_grant`
+- **WHEN** they choose **Delete** and confirm
+- **THEN** the client calls `delete_merchandise_stock_grant`
+- **AND** center `/app/inventory` on-hand reflects the updated or removed quantity
+
+Traceability: regression — `regression_brand_merchandise_inventory_tab_adds_franchise_stock`, `regression_brand_add_stock_form_calls_grant_rpc`, `regression_brand_stock_grant_edit_calls_update_rpc`, `regression_brand_stock_grant_delete_calls_delete_rpc`, `regression_inventory_includes_brand_stock_grants_in_on_hand`, `regression_stock_grant_search_matches_franchise_sku_and_note`.
 
 ### Requirement: Catalog SKUs are tied to curriculum
 

@@ -6,7 +6,7 @@ Brand-managed catalog; franchise centers place orders from an ecommerce-style sh
 
 | Portal | Route | Purpose |
 |--------|-------|---------|
-| Brand | `/app/merchandise` | Catalog CRUD, promos, payment settings, order fulfillment — pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Payment settings each use desktop list + detail |
+| Brand | `/app/merchandise` | Catalog CRUD, promos, payment settings, order fulfillment, franchise stock grants — pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Inventory / Payment settings each use desktop list + detail |
 | Center | `/app/merchandise` | Shop + checkout and order history — pipeline chrome like Curriculum (`PipelinePageHeader` + Catalog/Unpaid/Orders/Total KPIs); Shop / My Orders tabs; Shop list is one horizontal product card per row (same list density as Inventory) |
 | Platform | `/admin/brands/:slug` | Enable `merchandise` feature toggle |
 
@@ -37,6 +37,10 @@ Brand-configurable: Razorpay checkout, invoice/bank transfer, or both (`brand_se
 - **Razorpay start:** SPA calls Edge Function `merchandise-razorpay-checkout` via `functions.invoke` (session JWT). The function requires a signed-in user with `has_center_access`, `has_brand_access`, or `is_platform_admin` for the order; anonymous `order_id` lookups are rejected (`regression_merchandise_razorpay_checkout_requires_membership`).
 - **Payment reminders:** Edge Function `merchandise-payment-reminders` is cron-only. Set `CRON_SECRET` in function secrets and pass `x-cron-secret` from the scheduler. Missing secret → 503; wrong header → 401 (`regression_merchandise_reminders_require_cron_secret`).
 
+## Brand stock grants
+
+Brand `/app/merchandise` → **Inventory** lets staff assign on-hand quantity to a franchise without a shop order (`grant_center_merchandise_stock` → `merchandise_stock_grants`), and edit or delete existing grants (`update_merchandise_stock_grant`, `delete_merchandise_stock_grant`). Center `/app/inventory` adds those grants into on-hand / available alongside received/complete bulk orders (`buildCenterInventorySummary`). Migration `114_merchandise_stock_grants.sql`.
+
 ## Related
 
 - Canonical behavior: [`openspec/specs/brand-merchandise/spec.md`](../../openspec/specs/brand-merchandise/spec.md)
@@ -48,3 +52,4 @@ Brand-configurable: Razorpay checkout, invoice/bank transfer, or both (`brand_se
 - Migration `085_merchandise_catalog_levels.sql` — optional `level_id` tags + `list_center_active_merchandise_catalog`
 - Migration `087_fix_sync_merchandise_catalog_programs.sql` — curriculum save RPC reads `jsonb_array_elements` column `value`
 - Migration `089_list_center_merchandise_catalog_setof.sql` — center catalog RPC returns `SETOF merchandise_catalog`
+- Migration `114_merchandise_stock_grants.sql` — brand → franchise stock grants + `grant_center_merchandise_stock`

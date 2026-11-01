@@ -24,6 +24,10 @@ vi.mock("./BrandMerchandiseOrdersSection", () => ({
   BrandMerchandiseOrdersSection: () => <div data-testid="orders-section">Orders section</div>,
 }));
 
+vi.mock("./BrandMerchandiseInventorySection", () => ({
+  BrandMerchandiseInventorySection: () => <div data-testid="inventory-section">Inventory section</div>,
+}));
+
 vi.mock("./BrandMerchandisePaymentSettings", () => ({
   BrandMerchandisePaymentSettings: () => <div data-testid="payment-section">Payment section</div>,
 }));
@@ -84,7 +88,7 @@ describe("BrandMerchandisePage", () => {
     const { container } = renderPage();
 
     expect(screen.getByRole("heading", { name: "Merchandise" })).toBeDefined();
-    expect(screen.getByText(/franchise center orders/i)).toBeDefined();
+    expect(screen.getByText(/franchise orders, and stock grants/i)).toBeDefined();
     expect(screen.getByPlaceholderText("Search catalog...")).toBeDefined();
     expect(screen.getByRole("tablist", { name: "Merchandise sections" })).toBeDefined();
     expect(document.querySelector(".ed-pipeline-page-header")).toBeTruthy();
@@ -125,10 +129,26 @@ describe("BrandMerchandisePage", () => {
     expect(screen.queryByTestId("catalog-section")).toBeNull();
     expect(screen.queryByRole("button", { name: "+ Add Merchandise" })).toBeNull();
 
+    fireEvent.click(screen.getByRole("tab", { name: "Inventory" }));
+    expect(screen.getByTestId("inventory-section")).toBeDefined();
+    expect(screen.getByRole("button", { name: "+ Add stock" })).toBeDefined();
+    expect(screen.getByPlaceholderText("Search stock grants...")).toBeDefined();
+    fireEvent.change(screen.getByLabelText("Search stock grants"), { target: { value: "Pune" } });
+    expect(screen.getByRole("tab", { name: "Inventory" }).getAttribute("aria-selected")).toBe("true");
+    expect(screen.queryByTestId("catalog-section")).toBeNull();
+
     fireEvent.click(screen.getByRole("tab", { name: "Payment settings" }));
     expect(screen.getByTestId("payment-section")).toBeDefined();
     expect(screen.getByPlaceholderText("Search payment settings...")).toBeDefined();
     fireEvent.change(screen.getByLabelText("Search payment settings"), { target: { value: "Razorpay" } });
     expect(screen.getByRole("tab", { name: "Payment settings" }).getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("regression_brand_merchandise_inventory_tab_adds_franchise_stock", () => {
+    renderPage();
+    fireEvent.click(screen.getByRole("tab", { name: "Inventory" }));
+    expect(screen.getByTestId("inventory-section")).toBeDefined();
+    expect(screen.getByRole("button", { name: "+ Add stock" })).toBeDefined();
+    expect(screen.queryByRole("button", { name: "+ Add Merchandise" })).toBeNull();
   });
 });

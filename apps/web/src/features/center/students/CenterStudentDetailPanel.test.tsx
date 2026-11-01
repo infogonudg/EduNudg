@@ -12,8 +12,17 @@ vi.mock("@/hooks/useFeatureFlag", () => ({
 }));
 
 vi.mock("@/lib/studentPortalAdminApi", () => ({
-  inviteStudentPortalAccess: vi.fn(),
   pinEnrollmentProgram: vi.fn(),
+}));
+
+const upsertStudentPortalCredentials = vi.fn();
+
+vi.mock("@/lib/studentPortalCredentialsApi", () => ({
+  upsertStudentPortalCredentials: (...args: unknown[]) => upsertStudentPortalCredentials(...args),
+  studentPortalPasswordHint: (already: boolean) =>
+    already
+      ? "Leave blank to keep the current password, or enter a new one (min 6 characters) to reset."
+      : "Required for a new student login (min 6 characters). Share it with the student once.",
 }));
 
 vi.mock("@/lib/centerStudentProgramApi", () => ({
@@ -100,6 +109,15 @@ describe("CenterStudentDetailPanel", () => {
   const writeText = vi.fn().mockResolvedValue(undefined);
 
   beforeEach(() => {
+    upsertStudentPortalCredentials.mockReset();
+    upsertStudentPortalCredentials.mockResolvedValue({
+      error: null,
+      loginEmail: "asha.parent@example.com",
+      passwordWasSet: true,
+    });
+  });
+
+  beforeEach(() => {
     writeText.mockClear();
     Object.defineProperty(window, "location", {
       value: {
@@ -161,6 +179,24 @@ describe("CenterStudentDetailPanel", () => {
 
   it("regression_portal_access_shows_provided_email", () => {
     expect(screen.getByLabelText("Login email").getAttribute("value")).toBe("asha.parent@example.com");
+  });
+
+  it("regression_center_student_activates_portal_login_with_password", async () => {
+    expect(screen.getByRole("button", { name: "Activate portal login" })).toBeDefined();
+    fireEvent.change(screen.getByLabelText("Password"), { target: { value: "secret1" } });
+    fireEvent.click(screen.getByRole("button", { name: "Activate portal login" }));
+    await waitFor(() => {
+      expect(upsertStudentPortalCredentials).toHaveBeenCalledWith(
+        expect.objectContaining({
+          studentId: "s1",
+          email: "asha.parent@example.com",
+          password: "secret1",
+          alreadyProvisioned: false,
+        })
+      );
+    });
+    expect(await screen.findByText(/Password to share:/i)).toBeDefined();
+    expect(screen.getByText("secret1")).toBeDefined();
   });
 
   it("regression_center_student_copies_learn_login_url_without_password", async () => {

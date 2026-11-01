@@ -23,6 +23,8 @@ Google OAuth per portal (tables, SQL, test checklists): [google-oauth-rollout-ru
 
 Student **learn portal** shows dashboard with curriculum ladder (3/8 levels), exams, free/paid upcoming competitions, and past results after seed + migration `048_student_learn_portal.sql`.
 
+For **live students**, franchise staff set learn-portal email + password on center `/app/students` → Portal access (**Activate portal login** / **Update portal login**). Requires Edge Function `student-portal-credentials` and migration `115_student_portal_credentials.sql`. Passwords must be at least 6 characters (`admin` is rejected). **Copy Profile URL** still never includes a password.
+
 Student **data** (enrollment at Koramangala) is visible when logged in as **center** or **brand** under Students.
 
 Add to `/etc/hosts` if needed:

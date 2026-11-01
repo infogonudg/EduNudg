@@ -121,7 +121,8 @@ sequenceDiagram
   participant RPC as Supabase_RPC
   participant CA as Center_app
 
-  CA->>RPC: convert_lead_to_student + invite_student_portal_access
+  CA->>EF: student-portal-credentials (email + password)
+  EF->>RPC: sync_student_portal_credentials
   S->>L: sign in at learn host
   S->>RPC: get_student_learn_home brand_id
   RPC->>RPC: resolve_student_for_learn + active enrollment
@@ -129,7 +130,7 @@ sequenceDiagram
   S->>RPC: register_student_for_competition free only
 ```
 
-Student learn data is **always** scoped to active `student_enrollments.center_id`. Paid competition enrollment shows **Coming soon** on the portal until payment integration ships.
+Student learn data is **always** scoped to active `student_enrollments.center_id`. Paid competition enrollment shows **Coming soon** on the portal until payment integration ships. Franchise staff set/reset the learn password on `/app/students` Portal access (Edge Function `student-portal-credentials`).
 
 ## Flow 9 — Center CSV enroll existing students
 

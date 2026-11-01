@@ -7,6 +7,10 @@ import {
   listCenterMerchandiseOrders,
   type MerchandiseOrderRow,
 } from "@/lib/merchandiseOrdersApi";
+import {
+  fetchCenterMerchandiseStockGrantTotals,
+  type CenterStockGrantTotal,
+} from "@/lib/merchandiseStockGrantsApi";
 
 export const INCOMING_ORDER_STATUSES = ["awaiting_payment", "placed", "approved", "shipped"] as const;
 export const RECEIVED_ORDER_STATUSES = ["received", "complete"] as const;
@@ -48,11 +52,12 @@ function isBulkCenterLine(line: MerchandiseOrderRow["merchandise_order_lines"][n
   return !line.student_id;
 }
 
-/** Aggregate on-hand, incoming, and available stock from merchandise orders. */
+/** Aggregate on-hand, incoming, and available stock from orders + brand stock grants. */
 export function buildCenterInventorySummary(input: {
   catalog: InventoryCatalogItem[];
   orders: MerchandiseOrderRow[];
   allocatedLineIds: Set<string>;
+  stockGrants?: CenterStockGrantTotal[];
 }): InventorySummaryRow[] {
   const byCatalog = new Map<string, InventorySummaryRow>();
 
@@ -92,6 +97,12 @@ export function buildCenterInventorySummary(input: {
         }
       }
     }
+  }
+
+  for (const grant of input.stockGrants ?? []) {
+    const row = byCatalog.get(grant.catalogItemId);
+    if (!row) continue;
+    row.onHand += grant.quantity;
   }
 
   for (const row of byCatalog.values()) {
@@ -286,10 +297,11 @@ export async function fetchCenterInventorySummary(
   brandId: string,
   centerId: string
 ): Promise<InventorySummaryRow[]> {
-  const [catalog, orders, allocatedLineIds] = await Promise.all([
+  const [catalog, orders, allocatedLineIds, stockGrants] = await Promise.all([
     listActiveMerchandiseCatalog(brandId, centerId),
     listCenterMerchandiseOrders(centerId),
     fetchAllocatedBulkLineIds(centerId),
+    fetchCenterMerchandiseStockGrantTotals(centerId),
   ]);
 
   const catalogItems: InventoryCatalogItem[] = catalog.map((item) => ({
@@ -304,7 +316,12 @@ export async function fetchCenterInventorySummary(
 
   const catalogMeta = new Map(catalogItems.map((item) => [item.catalogItemId, item]));
 
-  const summary = buildCenterInventorySummary({ catalog: catalogItems, orders, allocatedLineIds });
+  const summary = buildCenterInventorySummary({
+    catalog: catalogItems,
+    orders,
+    allocatedLineIds,
+    stockGrants,
+  });
 
   return summary.map((row) => {
     const meta = catalogMeta.get(row.catalogItemId);
