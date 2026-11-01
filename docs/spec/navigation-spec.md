@@ -44,7 +44,7 @@ On mobile, the staff top bar shows the brand Site logo beside the product name.
 | | **Competitions** | `/app/competitions` | Exists — Events + question bank; gated by `competitions` (default off) |
 | | Campaigns | `/app/campaigns` | Exists — CRUD |
 | | **Success stories** | `/app/success-stories` | Exists — pipeline chrome like Franchise Applications; KPI stats (Published, Draft, With photo, Total); Published / Draft tabs; Add Story modal; list + detail |
-| | Merchandise | `/app/merchandise` | Exists — pipeline header + Active/Draft/Orders/Total KPIs; Catalog / Promo Codes / Orders / Payment settings each use desktop list + detail |
+| | Merchandise | `/app/merchandise` | Exists — pipeline header + Active/Draft/Orders/Total KPIs; Catalog / Promo Codes / Orders / Inventory / Payment settings each use desktop list + detail; Inventory grants franchise stock without a shop order |
 | | Analytics | `/app/analytics` | Exists — KPIs + Performance Breakdown pulse (14D/30D) |
 | General | **Homepage** | `/app/homepage` | Exists — brand public site editor |
 | | **Center Site Configuration** | `/app/center-site` | Exists — parent enrollment template (`center_landing`) |

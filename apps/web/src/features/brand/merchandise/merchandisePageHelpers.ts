@@ -2,7 +2,7 @@ import type { MerchandiseBrandSettings } from "@/lib/merchandiseSettingsApi";
 import type { MerchandiseOrderRow } from "@/lib/merchandiseOrdersApi";
 
 export type CatalogTabFilter = "all" | "active" | "draft";
-export type MerchandiseSectionTab = "catalog" | "promo" | "orders" | "payment";
+export type MerchandiseSectionTab = "catalog" | "promo" | "orders" | "inventory" | "payment";
 
 export type MerchandiseCatalogCountRow = {
   sku: string;
@@ -71,6 +71,7 @@ export function merchandisePageCounts(items: MerchandiseCatalogCountRow[], order
 export function merchandiseSearchPlaceholder(tab: MerchandiseSectionTab): string {
   if (tab === "promo") return "Search promo codes...";
   if (tab === "orders") return "Search orders...";
+  if (tab === "inventory") return "Search stock grants...";
   if (tab === "payment") return "Search payment settings...";
   return "Search catalog...";
 }
@@ -78,6 +79,7 @@ export function merchandiseSearchPlaceholder(tab: MerchandiseSectionTab): string
 export function merchandiseSearchAriaLabel(tab: MerchandiseSectionTab): string {
   if (tab === "promo") return "Search promo codes";
   if (tab === "orders") return "Search orders";
+  if (tab === "inventory") return "Search stock grants";
   if (tab === "payment") return "Search payment settings";
   return "Search catalog";
 }

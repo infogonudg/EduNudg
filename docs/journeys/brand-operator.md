@@ -12,7 +12,7 @@ Brand staff use `http://{brand}.localhost:9000/app/*`.
 | Franchise Centers | Master-detail `/app/centers` — profile (no Social Media), open frontend/backend, disable/enable, delete, curriculum, **Import Franchise** CSV/Excel, **Export Franchise**; **Save Changes** stays sticky at the bottom while scrolling |
 | **Students** | Master-detail `/app/students` — same chrome as Franchise Management; search by student, franchise, or city; read-only contact + curriculum levels; **Export CSV** downloads the full roster |
 | Curriculum | Master-detail `/app/curriculum` — pipeline header + Active/Drafts/Programs/Total KPIs; courses/levels/units; on/off toggle in course detail header (mobile **Edit course** overlay includes the same controls); parent marketing stays editable after create |
-| Merchandise | Catalog, promos, payment settings, and franchise orders — pipeline header + Active/Draft/Orders/Total KPIs; each tab is list + detail |
+| Merchandise | Catalog, promos, payment settings, franchise orders, and Inventory stock grants — pipeline header + Active/Draft/Orders/Total KPIs; each tab is list + detail |
 | Analytics | Cross-center metrics |
 | Settings | White-label login copy (live split-login preview), **`lead_stale_days`**, **timezone**. Logo is Homepage **Site logo**. |
 | **Billing** | Pay EduNudg platform subscription (payment gateway) |

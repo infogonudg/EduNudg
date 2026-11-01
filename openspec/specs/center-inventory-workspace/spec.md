@@ -75,6 +75,18 @@ Center `/app/inventory` SHALL use the same catalog visibility as Shop: `list_cen
 - **WHEN** they open `/app/inventory`
 - **THEN** that SKU is absent even if older orders mention it
 
+### Requirement: On-hand includes brand stock grants
+
+Center Inventory on-hand SHALL sum received/complete bulk order lines **and** brand `merchandise_stock_grants` for that center. Grants for SKUs outside the assigned curriculum SHALL NOT create inventory rows.
+
+#### Scenario: Brand grant increases on-hand
+
+- **GIVEN** a brand stock grant of quantity N for an assigned-curriculum SKU at this center
+- **WHEN** staff open `/app/inventory`
+- **THEN** that SKU’s on-hand and available include N (minus allocations)
+
+Traceability: regression — `regression_inventory_includes_brand_stock_grants_in_on_hand`.
+
 ### Requirement: Inventory detail shows catalog curriculum
 
 Center `/app/inventory` SHALL show which curriculum course and program level each SKU belongs to, using the same `merchandise_catalog_programs` names as Shop.

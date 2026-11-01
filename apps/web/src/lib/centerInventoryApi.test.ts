@@ -117,6 +117,29 @@ describe("centerInventoryApi", () => {
     expect(kit).toMatchObject({ onHand: 3, incoming: 0, allocated: 0, available: 3 });
   });
 
+  it("regression_inventory_includes_brand_stock_grants_in_on_hand", () => {
+    const summary = buildCenterInventorySummary({
+      catalog,
+      orders: [],
+      allocatedLineIds: new Set(),
+      stockGrants: [
+        { catalogItemId: "item-a", quantity: 7 },
+        { catalogItemId: "item-a", quantity: 3 },
+        { catalogItemId: "item-b", quantity: 2 },
+      ],
+    });
+
+    expect(summary.find((row) => row.catalogItemId === "item-a")).toMatchObject({
+      onHand: 10,
+      available: 10,
+      incoming: 0,
+    });
+    expect(summary.find((row) => row.catalogItemId === "item-b")).toMatchObject({
+      onHand: 2,
+      available: 2,
+    });
+  });
+
   it("regression_inventory_omits_skus_not_in_assigned_catalog", () => {
     const summary = buildCenterInventorySummary({
       catalog: [catalog[0]!],

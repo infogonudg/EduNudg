@@ -63,7 +63,7 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | FR-B21 | B | Approve creates center + domain + operator invite | Same transaction: `franchise_centers`, `{center}.{brand}` mapping |
 | FR-B22 | B | 360° read-only student views | Brand `/app/students` lists every active enrollment across franchises; search by student, franchise name, or city; detail card shows contact + current curriculum levels (Franchise Management chrome); **Export CSV** downloads the full roster |
 | FR-B23 | B | **Curriculum** workspace `/app/curriculum` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Drafts/Programs/Total KPIs); master-detail: courses → levels → units; on/off toggle per course (`programs.is_active`); mobile overlay includes the same editable controls; parent marketing stays editable after create via Save; each course banner is stored in its own `brand-assets` folder |
-| FR-B24 | B | **Merchandise** workspace `/app/merchandise` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Payment settings each use desktop list + detail; catalog SKUs tied to curriculum courses and levels |
+| FR-B24 | B | **Merchandise** workspace `/app/merchandise` | Pipeline chrome like Franchise Applications (`PipelinePageHeader` + Active/Draft/Orders/Total KPIs); Catalog / Promo Codes / Orders / Inventory / Payment settings each use desktop list + detail; Inventory grants franchise on-hand stock without a shop order; catalog SKUs tied to curriculum courses and levels |
 
 ---
 
@@ -95,7 +95,7 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | FR-C15 | C | **Students** `/app/students` | Same pipeline chrome as Curriculum (Linked / Unassigned / Programs / Total); list + detail; Delivery **Phone** is free-form while typing (no remount / live format); **Save address** shows **Saved** plus **Address saved.** next to the button; **Copy Profile URL** copies the student/parent learn-portal login URL (no password) |
 | FR-C15b | C | **Import students** CSV | Template + `import_center_students`; auto `STU-NNN` code; profile phone = WhatsApp |
 | FR-C16 | C | **Fees** `/app/fees` | Same pipeline chrome (Outstanding / Paid / Overdue / Total); Invoices / Payments tabs |
-| FR-C17 | C | **Inventory** `/app/inventory` | Same pipeline chrome as Curriculum (In stock / Low stock / Incoming / Total); list is name / SKU / stock badge; `PipelineDetailPanel` has Curriculum/Program + stock facts + theme **Place New Order**; rows limited to assigned-curriculum SKUs |
+| FR-C17 | C | **Inventory** `/app/inventory` | Same pipeline chrome as Curriculum (In stock / Low stock / Incoming / Total); list is name / SKU / stock badge; `PipelineDetailPanel` has Curriculum/Program + stock facts + theme **Place New Order**; rows limited to assigned-curriculum SKUs; on-hand includes brand stock grants |
 | FR-C18 | C | **Merchandise** `/app/merchandise` | Same pipeline chrome (Catalog / Unpaid / Orders / Total); Shop / My Orders tabs; Shop list is one horizontal card per SKU with Curriculum/Program under the SKU for curriculum assigned to that franchise |
 
 ---

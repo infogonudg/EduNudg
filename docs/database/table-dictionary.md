@@ -82,6 +82,7 @@ RPC `set_franchise_center_status` — brand-only `active` ↔ `suspended` (Disab
 | `merchandise_invoices` | center | Per-order invoices |
 | `merchandise_payments` | center | Payment records |
 | `merchandise_reminder_log` | center | Payment reminder audit |
+| `merchandise_stock_grants` | center | Brand-assigned on-hand stock for a franchise (no shop order); summed into center Inventory |
 | `student_level_progress` | center | Level progress on learn dashboard; `enrollment_id` required on new writes |
 | `brand_competitions` | brand | Competition calendar; `fee_type`, registration window |
 | `student_competition_registrations` | center | Student self-enroll (free); paid Coming soon |

@@ -11,6 +11,7 @@ import { useBrandScope } from "@/features/brand/hooks/useBrandScope";
 import { useOpsBreakpoint } from "@/features/center/hooks/useOpsBreakpoint";
 import { listBrandMerchandiseOrders, listMerchandiseCatalog } from "@/lib/merchandiseOrdersApi";
 import { BrandMerchandiseCatalogSection } from "./BrandMerchandiseCatalogSection";
+import { BrandMerchandiseInventorySection } from "./BrandMerchandiseInventorySection";
 import { BrandMerchandiseOrdersSection } from "./BrandMerchandiseOrdersSection";
 import { BrandMerchandisePromoSection } from "./BrandMerchandisePromoSection";
 import { BrandMerchandisePaymentSettings } from "./BrandMerchandisePaymentSettings";
@@ -28,6 +29,7 @@ const TABS = [
   { id: "catalog", label: "Catalog", mobileLabel: "Catalog" },
   { id: "promo", label: "Promo Codes", mobileLabel: "Promo Codes" },
   { id: "orders", label: "Orders", mobileLabel: "Orders" },
+  { id: "inventory", label: "Inventory", mobileLabel: "Inventory" },
   { id: "payment", label: "Payment settings", mobileLabel: "Payment" },
 ] as const;
 
@@ -44,6 +46,7 @@ export function BrandMerchandisePage() {
   const [activeTab, setActiveTab] = useState<MerchandiseSectionTab>("catalog");
   const [catalogAddOpen, setCatalogAddOpen] = useState(false);
   const [promoAddOpen, setPromoAddOpen] = useState(false);
+  const [stockAddOpen, setStockAddOpen] = useState(false);
   const [listFilter, setListFilter] = useState<CatalogTabFilter>("all");
   const [search, setSearch] = useState("");
 
@@ -73,11 +76,13 @@ export function BrandMerchandisePage() {
     setListFilter(filter);
     setCatalogAddOpen(false);
     setPromoAddOpen(false);
+    setStockAddOpen(false);
   };
 
   const selectTab = (value: MerchandiseSectionTab) => {
     if (value !== "catalog") setCatalogAddOpen(false);
     if (value !== "promo") setPromoAddOpen(false);
+    if (value !== "inventory") setStockAddOpen(false);
     setActiveTab(value);
   };
 
@@ -91,13 +96,15 @@ export function BrandMerchandisePage() {
       <Button onClick={() => setCatalogAddOpen(true)}>+ Add Merchandise</Button>
     ) : activeTab === "promo" ? (
       <Button onClick={() => setPromoAddOpen(true)}>+ Add Promo Code</Button>
+    ) : activeTab === "inventory" ? (
+      <Button onClick={() => setStockAddOpen(true)}>+ Add stock</Button>
     ) : null;
 
   return (
     <div className="ed-franchise-apps-page ed-brand-merch-page">
       <PipelinePageHeader
         title="Merchandise"
-        subtitle="Manage catalog SKUs, promo codes, and franchise center orders."
+        subtitle="Manage catalog SKUs, promo codes, franchise orders, and stock grants."
         actions={headerAction}
       />
 
@@ -170,6 +177,14 @@ export function BrandMerchandisePage() {
         />
       ) : null}
       {activeTab === "orders" ? <BrandMerchandiseOrdersSection brandId={brandId} search={search} /> : null}
+      {activeTab === "inventory" ? (
+        <BrandMerchandiseInventorySection
+          brandId={brandId}
+          formOpen={stockAddOpen}
+          onFormOpenChange={setStockAddOpen}
+          search={search}
+        />
+      ) : null}
       {activeTab === "payment" ? <BrandMerchandisePaymentSettings brandId={brandId} search={search} /> : null}
 
       {isMobile && activeTab === "catalog" && !catalogAddOpen ? (
@@ -189,6 +204,17 @@ export function BrandMerchandisePage() {
           className="ed-franchise-apps-page__fab"
           aria-label="Add Promo Code"
           onClick={() => setPromoAddOpen(true)}
+        >
+          +
+        </button>
+      ) : null}
+
+      {isMobile && activeTab === "inventory" && !stockAddOpen ? (
+        <button
+          type="button"
+          className="ed-franchise-apps-page__fab"
+          aria-label="Add stock"
+          onClick={() => setStockAddOpen(true)}
         >
           +
         </button>
