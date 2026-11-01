@@ -5,22 +5,20 @@ import {
 } from "@/lib/studentPortalCredentialsApi";
 
 const invokeMock = vi.fn();
-const reportAccessAudit = vi.fn(async () => undefined);
 
 vi.mock("@/lib/supabase", () => ({
   getSupabase: () => ({
-    functions: { invoke: (...args: unknown[]) => invokeMock(...args) },
+    functions: { invoke: invokeMock },
   }),
 }));
 
 vi.mock("@/services/auth/accessAuditApi", () => ({
-  reportAccessAudit: (...args: unknown[]) => reportAccessAudit(...args),
+  reportAccessAudit: vi.fn(async () => undefined),
 }));
 
 describe("studentPortalCredentialsApi", () => {
   beforeEach(() => {
     invokeMock.mockReset();
-    reportAccessAudit.mockClear();
   });
 
   it("regression_student_portal_password_required_when_not_provisioned", async () => {
