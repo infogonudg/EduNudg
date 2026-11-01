@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrandMerchandiseInventorySection } from "./BrandMerchandiseInventorySection";
 import { DELETE_CONFIRM_PHRASE } from "@/features/shared/confirmDelete";
+import { exactAccessibleName } from "@/test/exactAccessibleName";
 
 const grantCenterMerchandiseStock = vi.fn().mockResolvedValue("grant-new");
 const updateMerchandiseStockGrant = vi.fn().mockResolvedValue(undefined);
@@ -170,7 +171,7 @@ describe("BrandMerchandiseInventorySection", () => {
     fireEvent.change(screen.getByLabelText(new RegExp(`Type ${DELETE_CONFIRM_PHRASE}`, "i")), {
       target: { value: DELETE_CONFIRM_PHRASE },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Delete", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: exactAccessibleName("Delete") }));
 
     await waitFor(() => {
       expect(deleteMerchandiseStockGrant).toHaveBeenCalledWith("grant-1");
