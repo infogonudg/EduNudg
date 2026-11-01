@@ -7,6 +7,7 @@ import {
   Input,
   MutationError,
   OpsSectionCard,
+  PasswordInput,
   SaveButton,
   Select,
   ToggleField,
@@ -17,7 +18,11 @@ import {
   resolveStudentPortalLoginEmail,
   upsertStudentDeliveryAddress,
 } from "@/lib/studentProfileApi";
-import { inviteStudentPortalAccess, pinEnrollmentProgram } from "@/lib/studentPortalAdminApi";
+import { pinEnrollmentProgram } from "@/lib/studentPortalAdminApi";
+import {
+  studentPortalPasswordHint,
+  upsertStudentPortalCredentials,
+} from "@/lib/studentPortalCredentialsApi";
 import { fetchCenterStudentProgramContext } from "@/lib/centerStudentProgramApi";
 import { syncStudentBatchAssignments, type CenterStudentRow } from "@/lib/centerStudentsApi";
 import { fetchAuthorizedPrograms, fetchCenterBatches, type CenterBatchRow } from "@/lib/centerBatchesApi";
@@ -95,6 +100,8 @@ export function CenterStudentDetailPanel({
   const [loginEmail, setLoginEmail] = useState(
     resolveStudentPortalLoginEmail(student.login_email, student.parent_email)
   );
+  const [password, setPassword] = useState("");
+  const [passwordNotice, setPasswordNotice] = useState<string | null>(null);
   const [address, setAddress] = useState({
     address_line1: "",
     city: "",
@@ -108,6 +115,7 @@ export function CenterStudentDetailPanel({
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [copiedProfileUrl, setCopiedProfileUrl] = useState(false);
   const addressSaved = useSavedFlash();
+  const portalSaved = useSavedFlash();
 
   const batches = useQuery({
     queryKey: ["center-batches", centerId],
@@ -139,6 +147,8 @@ export function CenterStudentDetailPanel({
   useEffect(() => {
     setSelectedBatches(student.batch_ids);
     setLoginEmail(resolveStudentPortalLoginEmail(student.login_email, student.parent_email));
+    setPassword("");
+    setPasswordNotice(null);
     setProgramId(student.program_id ?? "");
     setLevelId(student.starting_level_id ?? "");
   }, [
@@ -176,14 +186,33 @@ export function CenterStudentDetailPanel({
     onSaved?.();
   };
 
-  const invite = useMutation({
+  const savePortalCredentials = useMutation({
     mutationFn: async () => {
       if (!loginEmail.trim()) throw new Error("Enter login email");
       clear();
-      await inviteStudentPortalAccess(student.id, loginEmail);
+      const alreadyProvisioned = Boolean(student.user_id);
+      const result = await upsertStudentPortalCredentials({
+        studentId: student.id,
+        centerId,
+        brandId,
+        email: loginEmail,
+        password,
+        fullName: student.full_name,
+        alreadyProvisioned,
+      });
+      if (result.error) throw new Error(result.error);
+      return { ...result, submittedPassword: password.trim() };
     },
-    onSuccess: () => {
-      setSaveMessage("Portal invite sent.");
+    onSuccess: (result) => {
+      portalSaved.flash();
+      if (result.passwordWasSet && result.submittedPassword) {
+        setPasswordNotice(result.submittedPassword);
+        setSaveMessage("Portal login saved. Share the password with the student now — it is shown once below.");
+      } else {
+        setPasswordNotice(null);
+        setSaveMessage("Portal login saved.");
+      }
+      setPassword("");
       invalidate();
     },
     onError: capture,
@@ -368,19 +397,39 @@ export function CenterStudentDetailPanel({
         <OpsSectionCard
           icon={ICON_KEY}
           title="Portal access"
-          description="Manage student login credentials and mobile app access status."
+          description="Set the student learn-portal email and password, then share the login URL."
         >
-          <Input label="Login email" value={loginEmail} onChange={setLoginEmail} editable />
+          <FormGrid columns={2}>
+            <Input label="Login email" value={loginEmail} onChange={setLoginEmail} editable type="email" />
+            <PasswordInput
+              label={portalLinked ? "New password (optional)" : "Password"}
+              value={password}
+              onChange={setPassword}
+              placeholder={
+                portalLinked ? "Leave blank to keep current password" : "Required for new login"
+              }
+            />
+          </FormGrid>
+          <p className="ed-text-sm ed-muted">{studentPortalPasswordHint(portalLinked)}</p>
           {portalLinked ? (
             <div className="ed-ops-linked-banner">
               <span aria-hidden>✓</span>
-              LINKED TO LOGIN · Last active: recently
+              LINKED TO LOGIN · Student can sign in on the learn portal
             </div>
           ) : null}
+          {passwordNotice ? (
+            <p className="ed-text-sm" role="status">
+              Password to share: <code>{passwordNotice}</code>
+            </p>
+          ) : null}
           <FormActions>
-            <Button variant="ghost" onClick={() => invite.mutate()} disabled={invite.isPending || !loginEmail.trim()}>
-              {portalLinked ? "Update invite" : "Send invite"}
-            </Button>
+            <SaveButton
+              onClick={() => savePortalCredentials.mutate()}
+              disabled={savePortalCredentials.isPending || !loginEmail.trim()}
+              pending={savePortalCredentials.isPending}
+              saved={portalSaved.saved}
+              label={portalLinked ? "Update portal login" : "Activate portal login"}
+            />
             <Button
               variant="ghost"
               onClick={() => {

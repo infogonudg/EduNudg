@@ -72,22 +72,35 @@ Center staff SHALL invite students to the learn portal; students SHALL link thei
 
 Traceability: FR-S12
 
-#### Scenario: Center invites student
+#### Scenario: Center activates student portal login with password
 
-- **WHEN** center staff with `has_center_access(C)` call `invite_student_portal_access(S.id)` and `students.login_email` is set for student S enrolled at C
-- **THEN** an auth invite is sent to `login_email`
-- **AND** the invite is auditable on the student record
+- **GIVEN** center staff with `has_center_access(C)` on student S enrolled at C
+- **WHEN** they save Portal access with a login email and password (min 6 characters) via `student-portal-credentials`
+- **THEN** a Supabase Auth user is created or updated
+- **AND** `sync_student_portal_credentials` sets `students.login_email` and `students.user_id`
+- **AND** the UI shows the password once so staff can share it with the student
+- **AND** brand staff with `has_brand_access` MAY call the same Edge Function for that center’s students
+
+#### Scenario: Center resets or edits student portal password
+
+- **GIVEN** student S already has a linked portal login
+- **WHEN** center staff enter a new password (min 6) and save Portal access
+- **THEN** Auth password is updated and the new password is shown once
+- **WHEN** they leave password blank and only change email
+- **THEN** the existing password is kept
 
 #### Scenario: Student links on first login
 
-- **WHEN** student accepts invite, authenticates, and calls `link_student_auth_user(S.id, B)` while `students.user_id` is null
-- **THEN** `students.user_id` is set to `auth.uid()`
-- **AND** subsequent learn portal RPCs resolve student S
+- **WHEN** student authenticates with the provisioned email and `students.user_id` is already set by staff credentials
+- **THEN** learn portal RPCs resolve student S
+- **OR** when `user_id` is still null and Auth email matches `login_email`, `resolve_student_for_learn` / `link_student_auth_user` MAY link on first login
 
 #### Scenario: Auth link is unique per brand
 
 - **WHEN** two student rows under the same brand attempt to link the same `user_id`
 - **THEN** the second link is rejected
+
+Traceability: regression — `regression_center_student_activates_portal_login_with_password`, `regression_student_portal_password_required_when_not_provisioned`, `regression_student_portal_credentials_invoke_edge_function`, `regression_center_student_copies_learn_login_url_without_password`.
 
 ### Requirement: Learn login uses franchise public chrome
 

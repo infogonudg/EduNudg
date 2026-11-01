@@ -92,7 +92,7 @@ FR IDs for v1 franchise/student journey. Portal column: `P` platform, `B` brand,
 | FR-C12 | C | Staff-only **Convert** | No parent self-serve link v1 |
 | FR-C13 | C | Convert field mapping | See [Convert mapping](#fr-c13--convert_lead_to_student-field-mapping) |
 | FR-C14 | C | Cannot convert unassigned brand leads | `center_id` must match self |
-| FR-C15 | C | **Students** `/app/students` | Same pipeline chrome as Curriculum (Linked / Unassigned / Programs / Total); list + detail; Delivery **Phone** is free-form while typing (no remount / live format); **Save address** shows **Saved** plus **Address saved.** next to the button; **Copy Profile URL** copies the student/parent learn-portal login URL (no password) |
+| FR-C15 | C | **Students** `/app/students` | Same pipeline chrome as Curriculum (Linked / Unassigned / Programs / Total); list + detail; Portal access activates/resets learn email+password (`student-portal-credentials`); Delivery **Phone** is free-form while typing (no remount / live format); **Save address** shows **Saved** plus **Address saved.** next to the button; **Copy Profile URL** copies the student/parent learn-portal login URL (no password) |
 | FR-C15b | C | **Import students** CSV | Template + `import_center_students`; auto `STU-NNN` code; profile phone = WhatsApp |
 | FR-C16 | C | **Fees** `/app/fees` | Same pipeline chrome (Outstanding / Paid / Overdue / Total); Invoices / Payments tabs |
 | FR-C17 | C | **Inventory** `/app/inventory` | Same pipeline chrome as Curriculum (In stock / Low stock / Incoming / Total); list is name / SKU / stock badge; `PipelineDetailPanel` has Curriculum/Program + stock facts + theme **Place New Order**; rows limited to assigned-curriculum SKUs; on-hand includes brand stock grants |

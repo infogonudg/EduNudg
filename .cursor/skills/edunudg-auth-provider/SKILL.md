@@ -24,6 +24,7 @@ description: Implement or change auth — Google, Facebook, WhatsApp OTP, passke
 - `TenantProvider` sits inside `BrowserRouter` and re-resolves when pathname/search (portal override) changes. Platform admin → center/learn URL in the same tab must flip `portalType` without requiring a full reload — otherwise logout then center/student login is access-denied. Regressions: `regression_platform_to_center_query_updates_tenant_without_full_reload`, `regression_learn_portal_query_resolves_after_platform_session`.
 - Sensitive staff actions (CSV export, Copy Profile URL, owner credentials, portal handoff) use `reportAccessAudit` / `log_access_audit_event`. Fatal SPA errors use `reportClientError` / `log_client_error_event` (do not ingest every `console.error`).
 - Franchise CSV/Excel import rows with `owner_email` provision through `center-owner-credentials` using lowercase one-word brand name + `@123`; completion displays the initial password. Never create Auth users or expose service-role credentials in the browser.
+- Student learn-portal passwords: center (or brand) staff use Edge Function `student-portal-credentials` + `sync_student_portal_credentials` from `/app/students` Portal access — create, edit, or reset (min 6 chars); show password once; never put the password in **Copy Profile URL**.
 - Deploy `auth-audit` so platform ops get IP + country; SPA falls back to RPC without IP.
 - Brand owner/admin and center owner/manager read tenant Auth+Access via `list_tenant_staff_audit`. Errors stay platform-only.
 - Rate-limit OTP via `auth_rate_limits`
